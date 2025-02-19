@@ -12,8 +12,8 @@ import { IReserve } from "../interfaces/IReserve.sol";
 import { ISortedOracles } from "../interfaces/ISortedOracles.sol";
 import { IBreakerBox } from "../interfaces/IBreakerBox.sol";
 
-import { Initializable } from "celo/contracts/common/Initializable.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { Initializable } from "../common/Initializable.sol";
+import { FixidityLib } from "../libraries/FixidityLib.sol";
 
 /**
  * @title BiPoolExchangeManager
@@ -35,13 +35,13 @@ contract BiPoolManager is IExchangeProvider, IBiPoolManager, Initializable, Owna
 
   uint256 private constant TRADING_MODE_BIDIRECTIONAL = 0;
 
-  // Address of the Mento Reserve contract
+  // Address of the Astonic Reserve contract
   IReserve public reserve;
 
-  // Address of the Mento BreakerBox contract
+  // Address of the Astonic BreakerBox contract
   IBreakerBox public breakerBox;
 
-  // Address of the Mento SortedOracles contract
+  // Address of the Astonic SortedOracles contract
   ISortedOracles public sortedOracles;
 
   // Token precision multiplier used to normalize values to the

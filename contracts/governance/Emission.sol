@@ -3,16 +3,16 @@
 pragma solidity 0.8.18;
 
 import { OwnableUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
-import { MentoToken } from "./MentoToken.sol";
+import { AstonicToken } from "./AstonicToken.sol";
 
 /**
- * @title Emission Contract for Mento Token
- * @author Mento Labs
- * @notice This contract handles the emission of Mento Tokens in an exponentially decaying manner.
+ * @title Emission Contract for Astonic Token
+ * @author Astonic Labs
+ * @notice This contract handles the emission of Astonic Tokens in an exponentially decaying manner.
  */
 contract Emission is OwnableUpgradeable {
   /// @notice Pre-calculated constant = EMISSION_HALF_LIFE / LN2.
-  uint256 public constant A = 454968308;
+  uint256 public constant A = 227484154;
 
   /// @notice Used to not lose precision in calculations.
   uint256 public constant SCALER = 1e18;
@@ -20,8 +20,8 @@ contract Emission is OwnableUpgradeable {
   /// @notice The timestamp when the emission process started.
   uint256 public emissionStartTime;
 
-  /// @notice The MentoToken contract reference.
-  MentoToken public mentoToken;
+  /// @notice The AstonicToken contract reference.
+  AstonicToken public astonicToken;
 
   /// @notice The max amount that will be minted through emission
   uint256 public emissionSupply;
@@ -51,13 +51,13 @@ contract Emission is OwnableUpgradeable {
 
   /**
    * @notice Initialize the Emission contract.
-   * @param mentoToken_ The address of the MentoToken contract.
+   * @param astonicToken_ The address of the AstonicToken contract.
    * @param emissionTarget_ The address of the emission target.
    * @param emissionSupply_ The total amount of tokens that can be emitted.
    */
-  function initialize(address mentoToken_, address emissionTarget_, uint256 emissionSupply_) public initializer {
+  function initialize(address astonicToken_, address emissionTarget_, uint256 emissionSupply_) public initializer {
     emissionStartTime = block.timestamp;
-    mentoToken = MentoToken(mentoToken_);
+    astonicToken = AstonicToken(astonicToken_);
     // slither-disable-next-line missing-zero-check
     emissionTarget = emissionTarget_;
     emissionSupply = emissionSupply_;
@@ -85,7 +85,7 @@ contract Emission is OwnableUpgradeable {
     totalEmittedAmount += amount;
 
     emit TokensEmitted(emissionTarget, amount);
-    mentoToken.mint(emissionTarget, amount);
+    astonicToken.mint(emissionTarget, amount);
   }
 
   /**

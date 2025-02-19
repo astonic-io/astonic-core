@@ -4,8 +4,8 @@ pragma solidity ^0.5.13;
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 
-import "celo/contracts/common/interfaces/IFreezer.sol";
-import "celo/contracts/common/interfaces/IRegistry.sol";
+import "../interfaces/IFreezer.sol";
+import "../interfaces/IRegistry.sol";
 
 import "../interfaces/IExchange.sol";
 import "../interfaces/IStableTokenV2.sol";
@@ -24,10 +24,10 @@ contract UsingRegistry is Ownable {
   bytes32 constant EXCHANGE_REGISTRY_ID = keccak256(abi.encodePacked("Exchange"));
   bytes32 constant FEE_CURRENCY_WHITELIST_REGISTRY_ID = keccak256(abi.encodePacked("FeeCurrencyWhitelist"));
   bytes32 constant FREEZER_REGISTRY_ID = keccak256(abi.encodePacked("Freezer"));
-  bytes32 constant GOLD_TOKEN_REGISTRY_ID = keccak256(abi.encodePacked("GoldToken"));
+  bytes32 constant PLANQ_TOKEN_REGISTRY_ID = keccak256(abi.encodePacked("PlanqToken"));
   bytes32 constant GOVERNANCE_REGISTRY_ID = keccak256(abi.encodePacked("Governance"));
   bytes32 constant GOVERNANCE_SLASHER_REGISTRY_ID = keccak256(abi.encodePacked("GovernanceSlasher"));
-  bytes32 constant LOCKED_GOLD_REGISTRY_ID = keccak256(abi.encodePacked("LockedGold"));
+  bytes32 constant LOCKED_PLANQ_REGISTRY_ID = keccak256(abi.encodePacked("LockedPlanq"));
   bytes32 constant RESERVE_REGISTRY_ID = keccak256(abi.encodePacked("Reserve"));
   bytes32 constant RANDOM_REGISTRY_ID = keccak256(abi.encodePacked("Random"));
   bytes32 constant SORTED_ORACLES_REGISTRY_ID = keccak256(abi.encodePacked("SortedOracles"));
@@ -65,8 +65,8 @@ contract UsingRegistry is Ownable {
     return IFreezer(registry.getAddressForOrDie(FREEZER_REGISTRY_ID));
   }
 
-  function getGoldToken() internal view returns (IERC20) {
-    return IERC20(registry.getAddressForOrDie(GOLD_TOKEN_REGISTRY_ID));
+  function getPlanqToken() internal view returns (IERC20) {
+    return IERC20(registry.getAddressForOrDie(PLANQ_TOKEN_REGISTRY_ID));
   }
 
   function getReserve() internal view returns (IReserve) {

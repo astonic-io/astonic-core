@@ -5,8 +5,8 @@ pragma solidity ^0.8;
 import { BaseForkTest } from "../BaseForkTest.sol";
 import { Locking } from "contracts/governance/locking/Locking.sol";
 import { GovernanceFactory } from "contracts/governance/GovernanceFactory.sol";
-import { MentoGovernor } from "contracts/governance/MentoGovernor.sol";
-import { MentoToken } from "contracts/governance/MentoToken.sol";
+import { AstonicGovernor } from "contracts/governance/AstonicGovernor.sol";
+import { AstonicToken } from "contracts/governance/AstonicToken.sol";
 import { ProxyAdmin } from "openzeppelin-contracts-next/contracts/proxy/transparent/ProxyAdmin.sol";
 import { ITransparentUpgradeableProxy } from "openzeppelin-contracts-next/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -38,33 +38,30 @@ contract LockingUpgradeForkTest is BaseForkTest {
   GovernanceFactory public governanceFactory = GovernanceFactory(0xee6CE2dbe788dFC38b8F583Da86cB9caf2C8cF5A);
   ProxyAdmin public proxyAdmin;
   Locking public locking;
-  MentoGovernor public mentoGovernor;
-  MentoToken public mentoToken;
+  AstonicGovernor public astonicGovernor;
+  AstonicToken public astonicToken;
 
   address public timelockController;
   address public newLockingImplementation;
 
-  address public mentoLabsMultisig = makeAddr("mentoLabsMultisig");
+  address public astonicLabsMultisig = makeAddr("astonicLabsMultisig");
 
   constructor(uint256 _chainId) BaseForkTest(_chainId) {}
 
   function setUp() public virtual override {
     super.setUp();
-    address newProxyAdmin = 0x7DeA70fC905f5C4E8f98971761C6641D16A428c1;
-    address multisig = 0x655133d8E90F8190ed5c1F0f3710F602800C0150;
-
-    proxyAdmin = ProxyAdmin(newProxyAdmin); //governanceFactory.proxyAdmin();
+    proxyAdmin = governanceFactory.proxyAdmin();
     locking = governanceFactory.locking();
     timelockController = address(governanceFactory.governanceTimelock());
-    mentoGovernor = governanceFactory.mentoGovernor();
-    mentoToken = governanceFactory.mentoToken();
+    astonicGovernor = governanceFactory.astonicGovernor();
+    astonicToken = governanceFactory.astonicToken();
 
-    newLockingImplementation = address(new Locking(true));
-    vm.prank(multisig);
+    newLockingImplementation = address(new Locking());
+    vm.prank(timelockController);
     proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(locking)), newLockingImplementation);
 
     vm.prank(timelockController);
-    locking.setMentoLabsMultisig(mentoLabsMultisig);
+    locking.setAstonicLabsMultisig(astonicLabsMultisig);
   }
 
   function test_blockNoDependentCalculations_afterL2Transition_shouldWorkAsBefore() public {
@@ -75,16 +72,16 @@ contract LockingUpgradeForkTest is BaseForkTest {
     vm.roll(28653031);
     vm.warp(1730937623);
 
-    // move 30 weeks forward on L1
-    _moveDays({ day: 30 * 7, forward: true, isL2: false });
+    // move 3 weeks forward on L1
+    _moveDays({ day: 3 * 7, forward: true, isL2: false });
 
-    // Take snapshot 30 weeks after Nov 07
+    // Take snapshot 3 weeks after Nov 07
     beforeSnapshot = _takeSnapshot(AIRDROP_CLAIMER_1, AIRDROP_CLAIMER_2);
 
     // move 5 weeks forward on L1
     _moveDays({ day: 5 * 7, forward: true, isL2: false });
 
-    // Take snapshot 35 weeks after Nov 07
+    // Take snapshot 8 weeks after Nov 07
     afterSnapshot = _takeSnapshot(AIRDROP_CLAIMER_1, AIRDROP_CLAIMER_2);
 
     // move 5 weeks backward on L1
@@ -148,33 +145,33 @@ contract LockingUpgradeForkTest is BaseForkTest {
   function test_setPaused_shouldPauseGovernance() public {
     _lockTokensForGovernance(AIRDROP_CLAIMER_1, 10_000_000e18);
 
-    vm.prank(mentoLabsMultisig);
+    vm.prank(astonicLabsMultisig);
     locking.setPaused(true);
 
     vm.prank(AIRDROP_CLAIMER_1);
     vm.expectRevert("locking is paused");
-    mentoGovernor.propose(new address[](1), new uint256[](1), new bytes[](1), "Test proposal");
+    astonicGovernor.propose(new address[](1), new uint256[](1), new bytes[](1), "Test proposal");
 
-    vm.prank(mentoLabsMultisig);
+    vm.prank(astonicLabsMultisig);
     locking.setPaused(false);
 
     vm.prank(AIRDROP_CLAIMER_1);
-    uint256 proposalId = mentoGovernor.propose(new address[](1), new uint256[](1), new bytes[](1), "Test proposal");
+    uint256 proposalId = astonicGovernor.propose(new address[](1), new uint256[](1), new bytes[](1), "Test proposal");
 
     _moveDays(1, true, false);
 
-    vm.prank(mentoLabsMultisig);
+    vm.prank(astonicLabsMultisig);
     locking.setPaused(true);
 
     vm.prank(AIRDROP_CLAIMER_1);
     vm.expectRevert("locking is paused");
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
   }
 
   function test_governance_afterL2Transition_shouldWorkAsBefore() public {
     _simulateL2Upgrade();
 
-    _moveDays(30 * 7, true, true);
+    _moveDays(7, true, true);
 
     uint256 votingPower1 = locking.getVotes(AIRDROP_CLAIMER_1);
     uint256 votingPower2 = locking.getVotes(AIRDROP_CLAIMER_2);
@@ -196,31 +193,31 @@ contract LockingUpgradeForkTest is BaseForkTest {
     assertEq(locking.getVotes(AIRDROP_CLAIMER_2), votingPower2);
 
     vm.prank(AIRDROP_CLAIMER_1);
-    uint256 proposalId = mentoGovernor.propose(new address[](1), new uint256[](1), new bytes[](1), "Test proposal");
+    uint256 proposalId = astonicGovernor.propose(new address[](1), new uint256[](1), new bytes[](1), "Test proposal");
 
     _moveDays(1, true, true);
 
     vm.prank(AIRDROP_CLAIMER_1);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.prank(AIRDROP_CLAIMER_2);
-    mentoGovernor.castVote(proposalId, 2);
+    astonicGovernor.castVote(proposalId, 2);
 
     _moveDays(5, true, true);
 
-    mentoGovernor.queue(proposalId);
+    astonicGovernor.queue(proposalId);
 
     _moveDays(2, true, true);
 
-    mentoGovernor.execute(proposalId);
+    astonicGovernor.execute(proposalId);
   }
 
   // used to give locker enough power to be able to propose
   function _lockTokensForGovernance(address locker, uint96 amount) internal returns (uint256 lockId) {
-    deal(address(mentoToken), locker, amount);
+    deal(address(astonicToken), locker, amount);
 
     vm.prank(locker);
-    mentoToken.approve(address(locking), amount);
+    astonicToken.approve(address(locking), amount);
 
     vm.prank(locker);
     lockId = locking.lock(locker, locker, amount, 104, 0);
@@ -249,25 +246,21 @@ contract LockingUpgradeForkTest is BaseForkTest {
   // by calculating the first block of the next week and substracting the current block
   function _calculateBlocksTillNextWeek(bool isL2) internal view returns (uint256) {
     if (isL2) {
-      return
-        L2_WEEK *
-        uint256(int256(locking.getWeek()) + locking.l2StartingPointWeek() + 1) +
-        locking.l2EpochShift() -
-        block.number;
+      return L2_WEEK * uint256(int256(locking.getWeek()) + locking.l2StartingPointWeek() + 1) + 507776 - block.number;
     } else {
-      return L1_WEEK * (locking.getWeek() + locking.startingPointWeek() + 1) + locking.L1_EPOCH_SHIFT() - block.number;
+      return L1_WEEK * (locking.getWeek() + locking.startingPointWeek() + 1) + 89964 - block.number;
     }
   }
 
   // simulates the L2 upgrade by setting the necessary parameters
   function _simulateL2Upgrade() internal {
-    vm.prank(mentoLabsMultisig);
+    vm.prank(astonicLabsMultisig);
     locking.setL2TransitionBlock(block.number);
-    vm.prank(mentoLabsMultisig);
-    locking.setL2StartingPointWeek(-1);
-    vm.prank(mentoLabsMultisig);
-    locking.setL2EpochShift(144896);
-    vm.prank(mentoLabsMultisig);
+    vm.prank(astonicLabsMultisig);
+    locking.setL2StartingPointWeek(20);
+    vm.prank(astonicLabsMultisig);
+    locking.setL2EpochShift(507776);
+    vm.prank(astonicLabsMultisig);
     locking.setPaused(false);
   }
 

@@ -28,11 +28,11 @@ import {
 } from "openzeppelin-contracts-upgradeable/contracts/governance/TimelockControllerUpgradeable.sol";
 
 /**
- * @title Mento Governor
- * @author Mento Labs
+ * @title Astonic Governor
+ * @author Astonic Labs
  * @notice Governor contract extending on OpenZeppelin's upgradeable governance contracts.
  */
-contract MentoGovernor is
+contract AstonicGovernor is
   GovernorUpgradeable,
   GovernorSettingsUpgradeable,
   GovernorCompatibilityBravoUpgradeable,
@@ -41,8 +41,8 @@ contract MentoGovernor is
   GovernorTimelockControlUpgradeable
 {
   /**
-   * @notice Initializes the MentoGovernor with voting, settings, compatibility, and timelock configurations.
-   * @param veToken The escrowed Mento Token used for voting.
+   * @notice Initializes the AstonicGovernor with voting, settings, compatibility, and timelock configurations.
+   * @param veToken The escrowed Astonic Token used for voting.
    * @param timelockController The timelock controller used by the governor.
    * @param votingDelay_ The delay time in blocks between the proposal creation and the start of voting.
    * @param votingPeriod_ The voting duration in blocks between the vote start and vote end.
@@ -50,7 +50,7 @@ contract MentoGovernor is
    * @param quorum_ The minimum number of votes in percent of total supply required in order for a proposal to succeed.
    */
   // solhint-disable-next-line func-name-mixedcase
-  function __MentoGovernor_init(
+  function __AstonicGovernor_init(
     IVotesUpgradeable veToken,
     TimelockControllerUpgradeable timelockController,
     uint256 votingDelay_,
@@ -58,7 +58,7 @@ contract MentoGovernor is
     uint256 threshold_,
     uint256 quorum_
   ) external initializer {
-    __Governor_init("MentoGovernor");
+    __Governor_init("AstonicGovernor");
     __GovernorSettings_init(votingDelay_, votingPeriod_, threshold_);
     __GovernorCompatibilityBravo_init();
     __GovernorVotes_init(veToken);

@@ -21,16 +21,16 @@ contract MockReserve {
   // solhint-disable-next-line no-empty-blocks
   receive() external payable {}
 
-  function setGoldToken(address goldTokenAddress) external {
+  function setPlanqToken(address goldTokenAddress) external {
     goldToken = IERC20(goldTokenAddress);
   }
 
-  function transferGold(address to, uint256 value) external returns (bool) {
+  function transferPlanq(address to, uint256 value) external returns (bool) {
     require(goldToken.transfer(to, value), "gold token transfer failed");
     return true;
   }
 
-  function transferExchangeGold(address to, uint256 value) external returns (bool) {
+  function transferExchangePlanq(address to, uint256 value) external returns (bool) {
     require(goldToken.transfer(to, value), "gold token transfer failed");
     return true;
   }
@@ -63,7 +63,7 @@ contract MockReserve {
     return true;
   }
 
-  function getUnfrozenReserveGoldBalance() external view returns (uint256) {
+  function getUnfrozenReservePlanqBalance() external view returns (uint256) {
     return address(this).balance;
   }
 

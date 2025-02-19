@@ -4,7 +4,7 @@ pragma solidity ^0.8;
 import { console } from "forge-std/console.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { VM_ADDRESS } from "mento-std/Constants.sol";
+import { VM_ADDRESS } from "test/utils/Constants.sol";
 
 import { ExchangeForkTest } from "../ExchangeForkTest.sol";
 import { TokenHelpers } from "../helpers/TokenHelpers.sol";

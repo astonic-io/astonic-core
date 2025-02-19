@@ -26,8 +26,8 @@ contract BancorExchangeProviderForkTest is BaseForkTest {
     super.setUp();
     ownerAddress = makeAddr("owner");
     brokerAddress = address(this.broker());
-    reserveAddress = address(mentoReserve);
-    reserveToken = ERC20(address(mentoReserve.collateralAssets(0))); // == CELO
+    reserveAddress = address(astonicReserve);
+    reserveToken = ERC20(address(astonicReserve.collateralAssets(0))); // == PLANQ
     swapToken = ERC20(this.lookup("StableToken")); // == cUSD
 
     // Deploy and initialize BancorExchangeProvider (includes BancorFormula as part of init)

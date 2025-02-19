@@ -2,7 +2,7 @@
 pragma solidity 0.8.18;
 // solhint-disable state-visibility
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import { TestERC20 } from "test/utils/mocks/TestERC20.sol";
@@ -26,7 +26,7 @@ contract FuzzTestLocking is Test {
     vm.deal(user1, 100 ether);
     testERC20 = new TestERC20("Test", "TST");
 
-    locking = new LockingHarness(false);
+    locking = new LockingHarness();
     locking.__Locking_init(IERC20Upgradeable(address(testERC20)), 0, 1, 3);
     locking.incrementBlock(locking.WEEK() + 1);
   }

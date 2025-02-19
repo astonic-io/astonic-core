@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-contract MockVeMento is ERC20Upgradeable {
+contract MockVeAstonic is ERC20Upgradeable {
   function mint(address to, uint256 amount) external {
     _mint(to, amount);
   }

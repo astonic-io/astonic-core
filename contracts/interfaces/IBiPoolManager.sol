@@ -9,7 +9,7 @@ import { ISortedOracles } from "./ISortedOracles.sol";
 import { IBreakerBox } from "./IBreakerBox.sol";
 import { IExchangeProvider } from "./IExchangeProvider.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "../libraries/FixidityLib.sol";
 
 /**
  * @title BiPool Manager interface

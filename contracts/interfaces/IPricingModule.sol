@@ -2,8 +2,8 @@
 pragma solidity >0.5.13 <0.9;
 
 /**
- * @title Interface for a Mento Pricing Module.
- * @notice A Mento pricing module represents an exchange relation between a pair of ERC20 assets.
+ * @title Interface for a Astonic Pricing Module.
+ * @notice A Astonic pricing module represents an exchange relation between a pair of ERC20 assets.
  */
 interface IPricingModule {
   /**

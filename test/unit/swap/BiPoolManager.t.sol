@@ -3,9 +3,9 @@
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { Test } from "mento-std/Test.sol";
-import { bytes32s, addresses } from "mento-std/Array.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { Test } from "test/utils/Test.sol";
+import { bytes32s, addresses } from "contracts/libraries/Array.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 import { MockReserve } from "test/utils//mocks/MockReserve.sol";
 import { MockBreakerBox } from "test/utils/mocks/MockBreakerBox.sol";
@@ -54,7 +54,7 @@ contract BiPoolManagerTest is Test {
   MockERC20 cUSD;
   MockERC20 cEUR;
   MockERC20 bridgedUSDC;
-  MockERC20 CELO;
+  MockERC20 PLANQ;
 
   IPricingModule constantProduct;
   IPricingModule constantSum;
@@ -76,10 +76,10 @@ contract BiPoolManagerTest is Test {
     notDeployer = makeAddr("notDeployer");
     broker = makeAddr("broker");
 
-    cUSD = newMockERC20("Celo Dollar", "cUSD", 18);
-    cEUR = newMockERC20("Celo Euro", "cEUR", 18);
+    cUSD = newMockERC20("Astonic Dollar", "cUSD", 18);
+    cEUR = newMockERC20("Astonic Euro", "cEUR", 18);
     bridgedUSDC = newMockERC20("Bridged USDC", "bridgedUSDC", 6);
-    CELO = newMockERC20("CELO", "CELO", 18);
+    PLANQ = newMockERC20("Planq", "PLQ", 18);
 
     constantProduct = new MockPricingModule("ConstantProduct");
     constantSum = new MockPricingModule("ConstantSum");
@@ -109,7 +109,7 @@ contract BiPoolManagerTest is Test {
 
     vm.mockCall(
       address(reserve),
-      abi.encodeWithSelector(reserve.isCollateralAsset.selector, address(CELO)),
+      abi.encodeWithSelector(reserve.isCollateralAsset.selector, address(PLANQ)),
       abi.encode(true)
     );
 
@@ -395,12 +395,12 @@ contract BiPoolManagerTest_createExchange is BiPoolManagerTest {
   function test_createExchange_whenAsset0IsNotRegistered_shouldRevert() public {
     MockERC20 nonReserveStable = newMockERC20("Non Reserve Stable Asset", "NRSA", 18);
     vm.expectRevert("asset0 must be a stable registered with the reserve");
-    createExchange(nonReserveStable, CELO);
+    createExchange(nonReserveStable, PLANQ);
   }
 
   function test_createExchange_whenAsset0IsCollateral_shouldRevert() public {
     vm.expectRevert("asset0 must be a stable registered with the reserve");
-    createExchange(bridgedUSDC, CELO);
+    createExchange(bridgedUSDC, PLANQ);
   }
 
   function test_createExchange_whenAsset1IsNotRegistered_shouldRevert() public {
@@ -409,14 +409,14 @@ contract BiPoolManagerTest_createExchange is BiPoolManagerTest {
     createExchange(cUSD, nonReserveCollateral);
   }
 
-  function test_createExchange_whenMentoExchangeIsNotSet_shouldRevert() public {
+  function test_createExchange_whenAstonicExchangeIsNotSet_shouldRevert() public {
     vm.expectRevert("pricingModule must be set");
-    createExchange(cUSD, CELO, IPricingModule(address(0)));
+    createExchange(cUSD, PLANQ, IPricingModule(address(0)));
   }
 
   function test_createExchange_whenAsset0IsNotSet_shouldRevert() public {
     vm.expectRevert("asset0 must be set");
-    createExchange(MockERC20(address(0)), CELO);
+    createExchange(MockERC20(address(0)), PLANQ);
   }
 
   function test_createExchange_whenAsset1IsNotSet_shouldRevert() public {
@@ -431,14 +431,14 @@ contract BiPoolManagerTest_createExchange is BiPoolManagerTest {
 
   function test_createExchange_whenReferenceRateFeedIDIsNotSet_shouldRevert() public {
     vm.expectRevert("referenceRateFeedID must be set");
-    createExchange(cUSD, CELO, constantProduct, address(0));
+    createExchange(cUSD, PLANQ, constantProduct, address(0));
   }
 
   function test_createExchange_whenSpreadNotLTEOne_shouldRevert() public {
     vm.expectRevert("spread must be less than or equal to 1");
     createExchange(
       cUSD,
-      CELO,
+      PLANQ,
       constantProduct,
       address(cUSD),
       FixidityLib.wrap(2 * 1e24), // spread
@@ -459,7 +459,7 @@ contract BiPoolManagerTest_createExchange is BiPoolManagerTest {
     vm.expectRevert("invalid pricingModule");
     createExchange(
       cUSD,
-      CELO,
+      PLANQ,
       constantProduct,
       address(cUSD),
       FixidityLib.wrap(2 * 1e24), // spread
@@ -468,12 +468,12 @@ contract BiPoolManagerTest_createExchange is BiPoolManagerTest {
   }
 
   function test_createExchange_whenInfoIsValid_shouldUpdateMappingAndEmit() public {
-    bytes32 exchangeId = keccak256(abi.encodePacked(cUSD.symbol(), CELO.symbol(), constantProduct.name()));
+    bytes32 exchangeId = keccak256(abi.encodePacked(cUSD.symbol(), PLANQ.symbol(), constantProduct.name()));
 
     mockOracleRate(address(cUSD), 2 * 1e24);
     vm.expectEmit(true, true, true, false);
-    emit ExchangeCreated(exchangeId, address(cUSD), address(CELO), address(constantProduct));
-    createExchange(cUSD, CELO);
+    emit ExchangeCreated(exchangeId, address(cUSD), address(PLANQ), address(constantProduct));
+    createExchange(cUSD, PLANQ);
 
     IExchangeProvider.Exchange[] memory exchanges = biPoolManager.getExchanges();
     assertEq(exchanges.length, 1);
@@ -481,10 +481,10 @@ contract BiPoolManagerTest_createExchange is BiPoolManagerTest {
   }
 
   function test_createExchange_whenInfoIsValid_setsBucketSizesCorrectly() public {
-    mockOracleRate(address(cUSD), 2 * 1e24); // 1 CELO == 2 cUSD
+    mockOracleRate(address(cUSD), 2 * 1e24); // 1 PLANQ == 2 cUSD
     bytes32 exchangeId = createExchange(
       cUSD,
-      CELO,
+      PLANQ,
       constantProduct,
       address(cUSD),
       FixidityLib.wrap(0.1 * 1e24), // spread
@@ -534,7 +534,7 @@ contract BiPoolManagerTest_destroyExchange is BiPoolManagerTest {
   function test_destroyExchange_whenMultipleExchangesExist_shouldUpdateTheIdList() public {
     mockOracleRate(address(cUSD), 2e24);
     bytes32 exchangeId0 = createExchange(cUSD, bridgedUSDC);
-    bytes32 exchangeId1 = createExchange(cUSD, CELO);
+    bytes32 exchangeId1 = createExchange(cUSD, PLANQ);
 
     vm.expectEmit(true, true, true, true);
     emit ExchangeDestroyed(exchangeId0, address(cUSD), address(bridgedUSDC), address(constantProduct));
@@ -547,7 +547,7 @@ contract BiPoolManagerTest_destroyExchange is BiPoolManagerTest {
 }
 
 contract BiPoolManagerTest_withExchange is BiPoolManagerTest {
-  bytes32 exchangeId_cUSD_CELO;
+  bytes32 exchangeId_cUSD_PLANQ;
   bytes32 exchangeId_cUSD_bridgedUSDC;
   bytes32 exchangeId_cEUR_bridgedUSDC;
 
@@ -555,7 +555,7 @@ contract BiPoolManagerTest_withExchange is BiPoolManagerTest {
     super.setUp();
 
     mockOracleRate(address(cUSD), 2e24);
-    exchangeId_cUSD_CELO = createExchange(cUSD, CELO);
+    exchangeId_cUSD_PLANQ = createExchange(cUSD, PLANQ);
 
     address USDUSDC_rateFeedID = address(uint160(uint256(keccak256(abi.encodePacked("USDUSDC")))));
     mockOracleRate(USDUSDC_rateFeedID, 1e24);
@@ -584,17 +584,17 @@ contract BiPoolManagerTest_quote is BiPoolManagerTest_withExchange {
 
   function test_getAmountOut_whenTokenInNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.getAmountOut(exchangeId_cUSD_CELO, address(cEUR), address(cUSD), 1e24);
+    biPoolManager.getAmountOut(exchangeId_cUSD_PLANQ, address(cEUR), address(cUSD), 1e24);
   }
 
   function test_getAmountOut_whenTokenOutNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.getAmountOut(exchangeId_cUSD_CELO, address(cUSD), address(cEUR), 1e24);
+    biPoolManager.getAmountOut(exchangeId_cUSD_PLANQ, address(cUSD), address(cEUR), 1e24);
   }
 
   function test_getAmountOut_whenTokenInEqualsTokenOut_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.getAmountOut(exchangeId_cUSD_CELO, address(cUSD), address(cUSD), 1e24);
+    biPoolManager.getAmountOut(exchangeId_cUSD_PLANQ, address(cUSD), address(cUSD), 1e24);
   }
 
   function test_getAmountOut_whenTokenInIsAsset0_itDelegatesToThePricingModule() public {
@@ -602,7 +602,7 @@ contract BiPoolManagerTest_quote is BiPoolManagerTest_withExchange {
     uint256 mockAmountOut = 0.5 * 1e24;
 
     mockGetAmountOut(constantProduct, mockAmountOut);
-    uint256 amountOut = biPoolManager.getAmountOut(exchangeId_cUSD_CELO, address(cUSD), address(CELO), amountIn);
+    uint256 amountOut = biPoolManager.getAmountOut(exchangeId_cUSD_PLANQ, address(cUSD), address(PLANQ), amountIn);
     assertEq(amountOut, mockAmountOut);
   }
 
@@ -611,7 +611,7 @@ contract BiPoolManagerTest_quote is BiPoolManagerTest_withExchange {
     uint256 mockAmountOut = 0.5 * 1e24;
 
     mockGetAmountOut(constantProduct, mockAmountOut);
-    uint256 amountOut = biPoolManager.getAmountOut(exchangeId_cUSD_CELO, address(CELO), address(cUSD), amountIn);
+    uint256 amountOut = biPoolManager.getAmountOut(exchangeId_cUSD_PLANQ, address(PLANQ), address(cUSD), amountIn);
     assertEq(amountOut, mockAmountOut);
   }
 
@@ -650,17 +650,17 @@ contract BiPoolManagerTest_quote is BiPoolManagerTest_withExchange {
 
   function test_getAmountIn_whenTokenInNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.getAmountIn(exchangeId_cUSD_CELO, address(cEUR), address(cUSD), 1e24);
+    biPoolManager.getAmountIn(exchangeId_cUSD_PLANQ, address(cEUR), address(cUSD), 1e24);
   }
 
   function test_getAmountIn_whenTokenOutNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.getAmountIn(exchangeId_cUSD_CELO, address(cUSD), address(cEUR), 1e24);
+    biPoolManager.getAmountIn(exchangeId_cUSD_PLANQ, address(cUSD), address(cEUR), 1e24);
   }
 
   function test_getAmountIn_whenTokenInEqualsTokenOut_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.getAmountIn(exchangeId_cUSD_CELO, address(cUSD), address(cUSD), 1e24);
+    biPoolManager.getAmountIn(exchangeId_cUSD_PLANQ, address(cUSD), address(cUSD), 1e24);
   }
 
   function test_getAmountIn_whenTokenInIsAsset0_itDelegatesToThePricingModule() public {
@@ -668,7 +668,7 @@ contract BiPoolManagerTest_quote is BiPoolManagerTest_withExchange {
     uint256 mockAmountIn = 0.5 * 1e24;
 
     mockGetAmountIn(constantProduct, mockAmountIn);
-    uint256 amountIn = biPoolManager.getAmountIn(exchangeId_cUSD_CELO, address(cUSD), address(CELO), amountOut);
+    uint256 amountIn = biPoolManager.getAmountIn(exchangeId_cUSD_PLANQ, address(cUSD), address(PLANQ), amountOut);
     assertEq(amountIn, mockAmountIn);
   }
 
@@ -677,7 +677,7 @@ contract BiPoolManagerTest_quote is BiPoolManagerTest_withExchange {
     uint256 mockAmountIn = 0.5 * 1e24;
 
     mockGetAmountIn(constantProduct, mockAmountIn);
-    uint256 amountIn = biPoolManager.getAmountIn(exchangeId_cUSD_CELO, address(CELO), address(cUSD), amountOut);
+    uint256 amountIn = biPoolManager.getAmountIn(exchangeId_cUSD_PLANQ, address(PLANQ), address(cUSD), amountOut);
     assertEq(amountIn, mockAmountIn);
   }
 
@@ -729,49 +729,49 @@ contract BiPoolManagerTest_swap is BiPoolManagerTest_withExchange {
   function test_swapIn_whenTradingModeDoesntExist_shouldRevert() public {
     vm.mockCall(address(breaker), abi.encodeWithSelector(breaker.getRateFeedTradingMode.selector), abi.encode(1));
     vm.expectRevert("Trading is suspended for this reference rate");
-    biPoolManager.swapIn(exchangeId_cUSD_CELO, address(cEUR), address(cUSD), 1e24);
+    biPoolManager.swapIn(exchangeId_cUSD_PLANQ, address(cEUR), address(cUSD), 1e24);
   }
 
   function test_swapIn_whenTokenInNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.swapIn(exchangeId_cUSD_CELO, address(cEUR), address(cUSD), 1e24);
+    biPoolManager.swapIn(exchangeId_cUSD_PLANQ, address(cEUR), address(cUSD), 1e24);
   }
 
   function test_swapIn_whenTokenOutNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.swapIn(exchangeId_cUSD_CELO, address(cUSD), address(cEUR), 1e24);
+    biPoolManager.swapIn(exchangeId_cUSD_PLANQ, address(cUSD), address(cEUR), 1e24);
   }
 
   function test_swapIn_whenTokenInEqualsTokenOut_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.swapIn(exchangeId_cUSD_CELO, address(cUSD), address(cUSD), 1e24);
+    biPoolManager.swapIn(exchangeId_cUSD_PLANQ, address(cUSD), address(cUSD), 1e24);
   }
 
   function test_swapIn_whenTokenInIsAsset0_itDelegatesToThePricingModule() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
 
     uint256 amountIn = 1e24;
     uint256 mockAmountOut = 0.5 * 1e24;
 
     mockGetAmountOut(constantProduct, mockAmountOut);
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, address(cUSD), address(CELO), amountIn);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, address(cUSD), address(PLANQ), amountIn);
 
-    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
     assertEq(amountOut, mockAmountOut);
     assertEq(exchangeAfter.bucket0, exchange.bucket0 + amountIn);
     assertEq(exchangeAfter.bucket1, exchange.bucket1 - amountOut);
   }
 
   function test_swapIn_whenTokenInIsAsset1_itDelegatesToThePricingModule() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
 
     uint256 amountIn = 1e24;
     uint256 mockAmountOut = 0.5 * 1e24;
 
     mockGetAmountOut(constantProduct, mockAmountOut);
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, address(CELO), address(cUSD), amountIn);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, address(PLANQ), address(cUSD), amountIn);
 
-    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
     assertEq(amountOut, mockAmountOut);
     assertEq(exchangeAfter.bucket0, exchange.bucket0 - amountOut);
     assertEq(exchangeAfter.bucket1, exchange.bucket1 + amountIn);
@@ -824,49 +824,49 @@ contract BiPoolManagerTest_swap is BiPoolManagerTest_withExchange {
   function test_swapOut_whenTradingModeDoesntExist_shouldRevert() public {
     vm.mockCall(address(breaker), abi.encodeWithSelector(breaker.getRateFeedTradingMode.selector), abi.encode(2));
     vm.expectRevert("Trading is suspended for this reference rate");
-    biPoolManager.swapOut(exchangeId_cUSD_CELO, address(cEUR), address(cUSD), 1e24);
+    biPoolManager.swapOut(exchangeId_cUSD_PLANQ, address(cEUR), address(cUSD), 1e24);
   }
 
   function test_swapOut_whenTokenInNotInPool_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.swapOut(exchangeId_cUSD_CELO, address(cEUR), address(cUSD), 1e24);
+    biPoolManager.swapOut(exchangeId_cUSD_PLANQ, address(cEUR), address(cUSD), 1e24);
   }
 
   function test_swapOut_whenTokenOutNotInexchange_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.swapOut(exchangeId_cUSD_CELO, address(cUSD), address(cEUR), 1e24);
+    biPoolManager.swapOut(exchangeId_cUSD_PLANQ, address(cUSD), address(cEUR), 1e24);
   }
 
   function test_swapOut_whenTokenInEqualsTokenOut_itReverts() public {
     vm.expectRevert("tokenIn and tokenOut must match exchange");
-    biPoolManager.swapOut(exchangeId_cUSD_CELO, address(cUSD), address(cUSD), 1e24);
+    biPoolManager.swapOut(exchangeId_cUSD_PLANQ, address(cUSD), address(cUSD), 1e24);
   }
 
   function test_swapOut_whenTokenInIsAsset0_itDelegatesToThePricingModule() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
 
     uint256 amountOut = 1e24;
     uint256 mockAmountIn = 0.5 * 1e24;
 
     mockGetAmountIn(constantProduct, mockAmountIn);
-    uint256 amountIn = biPoolManager.swapOut(exchangeId_cUSD_CELO, address(cUSD), address(CELO), amountOut);
+    uint256 amountIn = biPoolManager.swapOut(exchangeId_cUSD_PLANQ, address(cUSD), address(PLANQ), amountOut);
 
-    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
     assertEq(amountIn, mockAmountIn);
     assertEq(exchangeAfter.bucket0, exchange.bucket0 + amountIn);
     assertEq(exchangeAfter.bucket1, exchange.bucket1 - amountOut);
   }
 
   function test_swapOut_whenTokenInIsAsset1_itDelegatesToThePricingModule() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
 
     uint256 amountOut = 1e24;
     uint256 mockAmountIn = 0.6 * 1e24;
 
     mockGetAmountIn(constantProduct, mockAmountIn);
-    uint256 amountIn = biPoolManager.swapOut(exchangeId_cUSD_CELO, address(CELO), address(cUSD), amountOut);
+    uint256 amountIn = biPoolManager.swapOut(exchangeId_cUSD_PLANQ, address(PLANQ), address(cUSD), amountOut);
 
-    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    IBiPoolManager.PoolExchange memory exchangeAfter = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
     assertEq(amountIn, mockAmountIn);
     assertEq(exchangeAfter.bucket0, exchange.bucket0 - amountOut);
     assertEq(exchangeAfter.bucket1, exchange.bucket1 + amountIn);
@@ -911,15 +911,15 @@ contract BiPoolManagerTest_bucketUpdates is BiPoolManagerTest_withExchange {
     changePrank(broker);
   }
 
-  function swap(bytes32 exchangeId_cUSD_CELO, uint256 amountIn, uint256 amountOut) internal {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+  function swap(bytes32 exchangeId_cUSD_PLANQ, uint256 amountIn, uint256 amountOut) internal {
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
     mockGetAmountOut(constantProduct, amountOut);
-    biPoolManager.swapIn(exchangeId_cUSD_CELO, exchange.asset0, exchange.asset1, amountIn);
+    biPoolManager.swapIn(exchangeId_cUSD_PLANQ, exchange.asset0, exchange.asset1, amountIn);
   }
 
   function test_swapIn_whenBucketsAreStale_updatesBuckets() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
-    swap(exchangeId_cUSD_CELO, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
+    swap(exchangeId_cUSD_PLANQ, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
 
     vm.warp(exchange.config.referenceRateResetFrequency + 1);
     sortedOracles.setNumRates(address(cUSD), 10);
@@ -928,32 +928,32 @@ contract BiPoolManagerTest_bucketUpdates is BiPoolManagerTest_withExchange {
     vm.expectEmit(true, true, true, true);
     uint256 stablePoolResetSize = exchange.config.stablePoolResetSize;
     emit BucketsUpdated(
-      exchangeId_cUSD_CELO,
+      exchangeId_cUSD_PLANQ,
       stablePoolResetSize,
       stablePoolResetSize / 2 // due to sortedOracles exchange rate 2:1
     );
 
     uint256 amountIn = 1e24;
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, exchange.asset0, exchange.asset1, 1e24);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, exchange.asset0, exchange.asset1, 1e24);
 
     // Refresh exchange
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
 
     assertEq(stablePoolResetSize + amountIn, exchange.bucket0);
     assertEq((stablePoolResetSize / 2) - amountOut, exchange.bucket1);
   }
 
   function test_swapIn_whenBucketsAreNotStale_doesNotUpdateBuckets() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
-    swap(exchangeId_cUSD_CELO, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
+    swap(exchangeId_cUSD_PLANQ, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
     uint256 bucket0BeforeSwap = exchange.bucket0;
     uint256 bucket1BeforeSwap = exchange.bucket1;
 
     uint256 amountIn = 1e24;
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, exchange.asset0, exchange.asset1, 1e24);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, exchange.asset0, exchange.asset1, 1e24);
 
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
 
     /*
      * XXX: Because forge doesn't support an inverse to `expectEmit` we
@@ -967,9 +967,9 @@ contract BiPoolManagerTest_bucketUpdates is BiPoolManagerTest_withExchange {
   }
 
   function test_swapIn_whenBucketsAreStale_butMinReportsNotMet_doesNotUpdateBuckets() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
-    swap(exchangeId_cUSD_CELO, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
+    swap(exchangeId_cUSD_PLANQ, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
     uint256 bucket0BeforeSwap = exchange.bucket0;
     uint256 bucket1BeforeSwap = exchange.bucket1;
 
@@ -978,18 +978,18 @@ contract BiPoolManagerTest_bucketUpdates is BiPoolManagerTest_withExchange {
     sortedOracles.setMedianTimestampToNow(address(cUSD));
 
     uint256 amountIn = 1e24;
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, exchange.asset0, exchange.asset1, 1e24);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, exchange.asset0, exchange.asset1, 1e24);
 
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
 
     assertEq(bucket0BeforeSwap + amountIn, exchange.bucket0);
     assertEq(bucket1BeforeSwap - amountOut, exchange.bucket1);
   }
 
   function test_swapIn_whenBucketsAreStale_butReportIsExpired_doesNotUpdateBuckets() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
-    swap(exchangeId_cUSD_CELO, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
+    swap(exchangeId_cUSD_PLANQ, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
     uint256 bucket0BeforeSwap = exchange.bucket0;
     uint256 bucket1BeforeSwap = exchange.bucket1;
 
@@ -999,18 +999,18 @@ contract BiPoolManagerTest_bucketUpdates is BiPoolManagerTest_withExchange {
     sortedOracles.setMedianTimestampToNow(address(cUSD));
 
     uint256 amountIn = 1e24;
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, exchange.asset0, exchange.asset1, 1e24);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, exchange.asset0, exchange.asset1, 1e24);
 
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
 
     assertEq(bucket0BeforeSwap + amountIn, exchange.bucket0);
     assertEq(bucket1BeforeSwap - amountOut, exchange.bucket1);
   }
 
   function test_swapIn_whenBucketsAreStale_butMedianTimestampIsOld_doesNotUpdateBuckets() public {
-    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO);
-    swap(exchangeId_cUSD_CELO, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    IBiPoolManager.PoolExchange memory exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ);
+    swap(exchangeId_cUSD_PLANQ, exchange.bucket0 / 2, exchange.bucket1 / 2); // debalance exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
     uint256 bucket0BeforeSwap = exchange.bucket0;
     uint256 bucket1BeforeSwap = exchange.bucket1;
 
@@ -1019,9 +1019,9 @@ contract BiPoolManagerTest_bucketUpdates is BiPoolManagerTest_withExchange {
     sortedOracles.setMedianTimestamp(address(cUSD), block.timestamp - exchange.config.referenceRateResetFrequency);
 
     uint256 amountIn = 1e24;
-    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_CELO, exchange.asset0, exchange.asset1, 1e24);
+    uint256 amountOut = biPoolManager.swapIn(exchangeId_cUSD_PLANQ, exchange.asset0, exchange.asset1, 1e24);
 
-    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_CELO); // Refresh exchange
+    exchange = biPoolManager.getPoolExchange(exchangeId_cUSD_PLANQ); // Refresh exchange
 
     assertEq(bucket0BeforeSwap + amountIn, exchange.bucket0);
     assertEq(bucket1BeforeSwap - amountOut, exchange.bucket1);

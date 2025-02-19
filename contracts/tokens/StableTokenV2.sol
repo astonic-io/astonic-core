@@ -6,12 +6,11 @@ import { ERC20PermitUpgradeable } from "./patched/ERC20PermitUpgradeable.sol";
 import { ERC20Upgradeable } from "./patched/ERC20Upgradeable.sol";
 
 import { IStableTokenV2 } from "../interfaces/IStableTokenV2.sol";
-import { CalledByVm } from "celo/contracts/common/CalledByVm.sol";
 
 /**
  * @title ERC20 token with minting and burning permissioned to a broker and validators.
  */
-contract StableTokenV2 is ERC20PermitUpgradeable, IStableTokenV2, CalledByVm {
+contract StableTokenV2 is ERC20PermitUpgradeable, IStableTokenV2 {
   address public validators;
   address public broker;
   address public exchange;
@@ -61,7 +60,7 @@ contract StableTokenV2 is ERC20PermitUpgradeable, IStableTokenV2, CalledByVm {
    * It keeps the same signature as the original initialize() function
    * in legacy/StableToken.sol
    * @param _name The name of the stable token (English)
-   * @param _symbol A short symbol identifying the token (e.g. "cUSD")
+   * @param _symbol A short symbol identifying the token (e.g. "aUSD")
    * deprecated-param decimals Tokens are divisible to this many decimal places.
    * deprecated-param registryAddress Address of the Registry contract.
    * deprecated-param inflationRate Weekly inflation rate.
@@ -248,7 +247,7 @@ contract StableTokenV2 is ERC20PermitUpgradeable, IStableTokenV2, CalledByVm {
    * currency. After the tx is executed, gas is refunded to the sender and credited to the
    * various tx fee recipients via a call to `creditGasFees`.
    */
-  function debitGasFees(address from, uint256 value) external onlyVm {
+  function debitGasFees(address from, uint256 value) external onlyOwner {
     _burn(from, value);
   }
 
@@ -276,7 +275,7 @@ contract StableTokenV2 is ERC20PermitUpgradeable, IStableTokenV2, CalledByVm {
     uint256 tipTxFee,
     uint256 gatewayFee,
     uint256 baseTxFee
-  ) external onlyVm {
+  ) external onlyOwner {
     // slither-disable-next-line uninitialized-local
     uint256 amountToBurn;
     _mint(from, refund + tipTxFee + gatewayFee + baseTxFee);

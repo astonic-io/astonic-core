@@ -5,11 +5,11 @@ import { console } from "forge-std/console.sol";
 import { StdCheats } from "forge-std/StdCheats.sol";
 import { ExchangeForkTest } from "../ExchangeForkTest.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { VM_ADDRESS } from "mento-std/Constants.sol";
+import { VM_ADDRESS } from "test/utils/Constants.sol";
 import { ExchangeForkTest } from "../ExchangeForkTest.sol";
 
 import { IERC20 } from "contracts/interfaces/IERC20.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
 
 import { TokenHelpers } from "../helpers/TokenHelpers.sol";

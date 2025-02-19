@@ -2,18 +2,18 @@
 pragma solidity ^0.8;
 
 // Libraries
-import { Test } from "mento-std/Test.sol";
-import { CELO_REGISTRY_ADDRESS } from "mento-std/Constants.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { Test } from "test/utils/Test.sol";
+import { PLANQ_REGISTRY_ADDRESS } from "test/utils/Constants.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 // Interfaces
 import { IBiPoolManager } from "contracts/interfaces/IBiPoolManager.sol";
 import { IBreakerBox } from "contracts/interfaces/IBreakerBox.sol";
 import { IERC20 } from "contracts/interfaces/IERC20.sol";
 import { IBroker } from "contracts/interfaces/IBroker.sol";
-import { ICeloProxy } from "contracts/interfaces/ICeloProxy.sol";
+import { IPlanqProxy } from "contracts/interfaces/IPlanqProxy.sol";
 import { IOwnable } from "contracts/interfaces/IOwnable.sol";
-import { IRegistry } from "celo/contracts/common/interfaces/IRegistry.sol";
+import { IRegistry } from "contracts/interfaces/IRegistry.sol";
 import { IReserve } from "contracts/interfaces/IReserve.sol";
 import { ISortedOracles } from "contracts/interfaces/ISortedOracles.sol";
 import { ITradingLimitsHarness } from "test/utils/harnesses/ITradingLimitsHarness.sol";
@@ -29,8 +29,8 @@ interface IMint {
 
 /**
  * @title BaseForkTest
- * @notice Fork tests for Mento!
- * This test suite tests invariants on a fork of a live Mento environments.
+ * @notice Fork tests for Astonic!
+ * This test suite tests invariants on a fork of a live Astonic environments.
  * The philosophy is to test in accordance with how the target fork is configured.
  * Therefore, it doesn't make assumptions about the systems, nor tries to configure
  * the system to test specific scenarios. However, it should be exhaustive in testing
@@ -39,20 +39,20 @@ interface IMint {
 abstract contract BaseForkTest is Test {
   using FixidityLib for FixidityLib.Fraction;
 
-  IRegistry public registry = IRegistry(CELO_REGISTRY_ADDRESS);
+  IRegistry public registry = IRegistry(PLANQ_REGISTRY_ADDRESS);
 
   address governance;
   IBroker public broker;
   IBiPoolManager biPoolManager;
   IBreakerBox public breakerBox;
   ISortedOracles public sortedOracles;
-  IReserve public mentoReserve;
+  IReserve public astonicReserve;
   ITradingLimitsHarness public tradingLimits;
 
   address public trader;
 
   // @dev The number of collateral assets 5 is hardcoded here:
-  // [CELO, AxelarUSDC, EUROC, NativeUSDC, NativeUSDT]
+  // [PLANQ, AxelarUSDC, EUROC, NativeUSDC, NativeUSDT]
   uint8 public constant COLLATERAL_ASSETS_COUNT = 5;
 
   uint256 targetChainId;
@@ -77,7 +77,7 @@ abstract contract BaseForkTest is Test {
     /// This means that, when running locally, RPC calls will be cached.
     fork(targetChainId, (block.number / 100) * 100);
     // The precompile handler needs to be reinitialized after forking.
-    __CeloPrecompiles_init();
+    //__PlanqPrecompiles_init();
 
     tradingLimits = new TradingLimitsHarness();
 
@@ -88,7 +88,7 @@ abstract contract BaseForkTest is Test {
     breakerBox = IBreakerBox(address(sortedOracles.breakerBox()));
     vm.label(address(breakerBox), "BreakerBox");
     trader = makeAddr("trader");
-    mentoReserve = IReserve(lookup("Reserve"));
+    astonicReserve = IReserve(lookup("Reserve"));
 
     setUpBroker();
 
@@ -105,31 +105,31 @@ abstract contract BaseForkTest is Test {
   function setUpBroker() internal {
     Broker newBrokerImplementation = new Broker(false);
     vm.prank(IOwnable(address(broker)).owner());
-    ICeloProxy(address(broker))._setImplementation(address(newBrokerImplementation));
-    address brokerImplAddressAfterUpgrade = ICeloProxy(address(broker))._getImplementation();
+    IPlanqProxy(address(broker))._setImplementation(address(newBrokerImplementation));
+    address brokerImplAddressAfterUpgrade = IPlanqProxy(address(broker))._getImplementation();
     assert(address(newBrokerImplementation) == brokerImplAddressAfterUpgrade);
 
     address[] memory exchangeProviders = new address[](1);
     exchangeProviders[0] = address(biPoolManager);
     address[] memory reserves = new address[](1);
-    reserves[0] = address(mentoReserve);
+    reserves[0] = address(astonicReserve);
 
     vm.prank(IOwnable(address(broker)).owner());
     broker.setReserves(exchangeProviders, reserves);
   }
 
   function mint(address asset, address to, uint256 amount, bool updateSupply) public {
-    if (asset == lookup("GoldToken")) {
-      // with L2 Celo, we need to transfer GoldToken to the user manually from the reserve
-      transferCeloFromReserve(to, amount);
+    if (asset == lookup("PlanqToken")) {
+      // with L2 Planq, we need to transfer PlanqToken to the user manually from the reserve
+      transferPlanqFromReserve(to, amount);
       return;
     }
 
     deal(asset, to, amount, updateSupply);
   }
 
-  function transferCeloFromReserve(address to, uint256 amount) internal {
-    vm.prank(address(mentoReserve));
-    IERC20(lookup("GoldToken")).transfer(to, amount);
+  function transferPlanqFromReserve(address to, uint256 amount) internal {
+    vm.prank(address(astonicReserve));
+    IERC20(lookup("PlanqToken")).transfer(to, amount);
   }
 }

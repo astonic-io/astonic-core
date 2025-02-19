@@ -6,7 +6,7 @@ import { LockingTest } from "./LockingTest.sol";
 
 contract Lock_LockingTest is LockingTest {
   function test_init_shouldSetState() public view {
-    assertEq(address(locking.token()), address(mentoToken));
+    assertEq(address(locking.token()), address(astonicToken));
 
     assertEq(locking.startingPointWeek(), 0);
     assertEq(locking.minCliffPeriod(), 0);
@@ -15,7 +15,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_lock_whenSlopeIsLarge_shouldRevert() public {
-    mentoToken.mint(alice, 1500e18);
+    astonicToken.mint(alice, 1500e18);
 
     vm.expectRevert("period too big");
     vm.prank(alice);
@@ -23,7 +23,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_lock_whenCliffeIsLarge_shouldRevert() public {
-    mentoToken.mint(alice, 1500e18);
+    astonicToken.mint(alice, 1500e18);
 
     vm.expectRevert("cliff too big");
     vm.prank(alice);
@@ -31,7 +31,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_lock_whenAmountIsZero_shouldRevert() public {
-    mentoToken.mint(alice, 1500e18);
+    astonicToken.mint(alice, 1500e18);
 
     vm.expectRevert("amount is less than minimum");
     vm.prank(alice);
@@ -39,7 +39,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_lock_whenSlopeIsZero_shouldRevert() public {
-    mentoToken.mint(alice, 1500e18);
+    astonicToken.mint(alice, 1500e18);
 
     vm.expectRevert();
     vm.prank(alice);
@@ -47,7 +47,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_lock_whenAccountZero_shouldRevert() public {
-    mentoToken.mint(alice, 1500e18);
+    astonicToken.mint(alice, 1500e18);
 
     vm.expectRevert("account is zero");
     vm.prank(alice);
@@ -55,7 +55,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_lock_whenDelegateZero_shouldRevert() public {
-    mentoToken.mint(alice, 1500e18);
+    astonicToken.mint(alice, 1500e18);
 
     vm.expectRevert("delegate is zero");
     vm.prank(alice);
@@ -63,7 +63,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_withdraw_whenInSlope_shouldReleaseCorrectAmount() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 300e18, 3, 3);
@@ -73,20 +73,20 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 300e18);
-    assertEq(mentoToken.balanceOf(alice), 700e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 300e18);
+    assertEq(astonicToken.balanceOf(alice), 700e18);
 
     _incrementBlock(weekInBlocks);
 
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 200e18);
-    assertEq(mentoToken.balanceOf(alice), 800e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 200e18);
+    assertEq(astonicToken.balanceOf(alice), 800e18);
   }
 
   function test_withdraw_whenCalledFromAnotherAccount_shouldNotSendTokens() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 300e18, 3, 0);
@@ -96,12 +96,12 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(bob);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 300e18);
-    assertEq(mentoToken.balanceOf(alice), 700e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 300e18);
+    assertEq(astonicToken.balanceOf(alice), 700e18);
   }
 
   function test_withdraw_whenTheLockIsCreatedForSomeoneElse_shouldNotReleaseTokens() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.prank(alice);
     locking.lock(bob, bob, 300e18, 3, 0);
@@ -111,12 +111,12 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 300e18);
-    assertEq(mentoToken.balanceOf(alice), 700e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 300e18);
+    assertEq(astonicToken.balanceOf(alice), 700e18);
   }
 
   function test_withdraw_whenCalledByTheOwnerOfTheLock_shouldReleaseTokens() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.prank(alice);
     locking.lock(bob, bob, 300e18, 3, 0);
@@ -126,19 +126,19 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(bob);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 200e18);
-    assertEq(mentoToken.balanceOf(alice), 700e18);
-    assertEq(mentoToken.balanceOf(bob), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 200e18);
+    assertEq(astonicToken.balanceOf(alice), 700e18);
+    assertEq(astonicToken.balanceOf(bob), 100e18);
   }
 
   function test_withdraw_whenTailInVeToken_shouldReleaseCorrectAmounts() public {
-    mentoToken.mint(alice, 6000e18);
+    astonicToken.mint(alice, 6000e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 5200e18, 52, 53);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 5200e18);
-    assertEq(mentoToken.balanceOf(alice), 800e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 5200e18);
+    assertEq(astonicToken.balanceOf(alice), 800e18);
     // (52 / 104 + 53 / 103) * 5200 = 5275 > 5200
     assertEq(locking.balanceOf(alice), 5200e18);
 
@@ -154,8 +154,8 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 100e18);
-    assertEq(mentoToken.balanceOf(alice), 5900e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 100e18);
+    assertEq(astonicToken.balanceOf(alice), 5900e18);
     assertEq(locking.balanceOf(alice), 100e18);
 
     _incrementBlock(weekInBlocks);
@@ -163,8 +163,8 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 6000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 6000e18);
     assertEq(locking.balanceOf(alice), 0);
   }
 
@@ -231,7 +231,7 @@ contract Lock_LockingTest is LockingTest {
   }
 
   function test_getAvailableForWithdraw_shouldReturnCorrectAmount() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 300e18, 3, 0);
@@ -241,8 +241,8 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     uint256 availableForWithdraw = locking.getAvailableForWithdraw(alice);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 300e18);
-    assertEq(mentoToken.balanceOf(alice), 700e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 300e18);
+    assertEq(astonicToken.balanceOf(alice), 700e18);
     assertEq(availableForWithdraw, 200e18);
   }
 
@@ -254,7 +254,7 @@ contract Lock_LockingTest is LockingTest {
     uint256 relockBlock;
 
     _incrementBlock(weekInBlocks + 1);
-    mentoToken.mint(alice, 1000000e18);
+    astonicToken.mint(alice, 1000000e18);
 
     _incrementBlock(weekInBlocks / 2);
 
@@ -263,7 +263,7 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 3000e18, 3, 0);
     // WEEK 1
-    assertEq(mentoToken.balanceOf(address(locking)), 3000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 3000e18);
     // 3 / 104 * 3000 = 86
     assertApproxEqAbs(locking.balanceOf(alice), 86e18, 1e18);
     assertApproxEqAbs(locking.getVotes(alice), 86e18, 1e18);
@@ -309,7 +309,7 @@ contract Lock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId, charlie, 4000e18, 4, 0);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 4000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 4000e18);
     assertEq(locking.balanceOf(alice), 0);
     assertEq(locking.getVotes(alice), 0);
     assertEq(locking.balanceOf(bob), 0);

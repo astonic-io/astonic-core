@@ -6,20 +6,20 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol";
 
-import "celo/contracts/common/FixidityLib.sol";
-import "celo/contracts/common/Initializable.sol";
-import "celo/contracts/common/interfaces/ICeloVersionedContract.sol";
-import "celo/contracts/common/libraries/ReentrancyGuard.sol";
+import "../libraries/FixidityLib.sol";
+import "../common/Initializable.sol";
+import "../interfaces/IPlanqVersionedContract.sol";
+import "../libraries/ReentrancyGuard.sol";
 
-import "contracts/common/UsingRegistry.sol";
-import "contracts/interfaces/IReserve.sol";
-import "contracts/interfaces/ISortedOracles.sol";
+import "../common/UsingRegistry.sol";
+import "../interfaces/IReserve.sol";
+import "../interfaces/ISortedOracles.sol";
 
 /**
  * @title Ensures price stability of StableTokens with respect to their pegs
  */
 // solhint-disable-next-line max-states-count
-contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, UsingRegistry, ReentrancyGuard {
+contract Reserve is IReserve, IPlanqVersionedContract, Ownable, Initializable, UsingRegistry, ReentrancyGuard {
   using SafeMath for uint256;
   using FixidityLib for FixidityLib.Fraction;
   using Address for address payable; // prettier-ignore
@@ -48,9 +48,9 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   uint256 public spendingLimit;
   FixidityLib.Fraction private spendingRatio;
 
-  uint256 public frozenReserveGoldStartBalance;
-  uint256 public frozenReserveGoldStartDay;
-  uint256 public frozenReserveGoldDays;
+  uint256 public frozenReservePlanqStartBalance;
+  uint256 public frozenReservePlanqStartDay;
+  uint256 public frozenReservePlanqDays;
 
   mapping(address => bool) public isExchangeSpender;
   address[] public exchangeSpenderAddresses;
@@ -69,7 +69,7 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   event OtherReserveAddressAdded(address indexed otherReserveAddress);
   event OtherReserveAddressRemoved(address indexed otherReserveAddress, uint256 index);
   event AssetAllocationSet(bytes32[] symbols, uint256[] weights);
-  event ReserveGoldTransferred(address indexed spender, address indexed to, uint256 value);
+  event ReservePlanqTransferred(address indexed spender, address indexed to, uint256 value);
   event TobinTaxSet(uint256 value);
   event TobinTaxReserveRatioSet(uint256 value);
   event ExchangeSpenderAdded(address indexed exchangeSpender);
@@ -107,9 +107,9 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
    * @notice Used in place of the constructor to allow the contract to be upgradable via proxy.
    * @param registryAddress The address of the registry core smart contract.
    * @param _tobinTaxStalenessThreshold The initial number of seconds to cache tobin tax value for.
-   * @param _spendingRatioForCelo The relative daily spending limit for the reserve spender.
-   * @param _frozenGold The balance of reserve gold that is frozen.
-   * @param _frozenDays The number of days during which the frozen gold thaws.
+   * @param _spendingRatioForPlanq The relative daily spending limit for the reserve spender.
+   * @param _frozenPlanq The balance of reserve planq that is frozen.
+   * @param _frozenDays The number of days during which the frozen planq thaws.
    * @param _assetAllocationSymbols The symbols of the reserve assets.
    * @param _assetAllocationWeights The reserve asset weights.
    * @param _tobinTax The tobin tax value as a fixidity fraction.
@@ -121,8 +121,8 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   function initialize(
     address registryAddress,
     uint256 _tobinTaxStalenessThreshold,
-    uint256 _spendingRatioForCelo,
-    uint256 _frozenGold,
+    uint256 _spendingRatioForPlanq,
+    uint256 _frozenPlanq,
     uint256 _frozenDays,
     bytes32[] calldata _assetAllocationSymbols,
     uint256[] calldata _assetAllocationWeights,
@@ -134,8 +134,8 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
     _transferOwnership(msg.sender);
     setRegistry(registryAddress);
     setTobinTaxStalenessThreshold(_tobinTaxStalenessThreshold);
-    setDailySpendingRatio(_spendingRatioForCelo);
-    setFrozenGold(_frozenGold, _frozenDays);
+    setDailySpendingRatio(_spendingRatioForPlanq);
+    setFrozenPlanq(_frozenPlanq, _frozenDays);
     setAssetAllocations(_assetAllocationSymbols, _assetAllocationWeights);
     setTobinTax(_tobinTax);
     setTobinTaxReserveRatio(_tobinTaxReserveRatio);
@@ -236,21 +236,21 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   }
 
   /**
-   * @notice Sets the balance of reserve gold frozen from transfer.
-   * @param frozenGold The amount of CELO frozen.
-   * @param frozenDays The number of days the frozen CELO thaws over.
+   * @notice Sets the balance of reserve planq frozen from transfer.
+   * @param frozenPlanq The amount of PLANQ frozen.
+   * @param frozenDays The number of days the frozen PLANQ thaws over.
    */
-  function setFrozenGold(uint256 frozenGold, uint256 frozenDays) public onlyOwner {
-    require(frozenGold <= address(this).balance, "Cannot freeze more than balance");
-    frozenReserveGoldStartBalance = frozenGold;
+  function setFrozenPlanq(uint256 frozenPlanq, uint256 frozenDays) public onlyOwner {
+    require(frozenPlanq <= address(this).balance, "Cannot freeze more than balance");
+    frozenReservePlanqStartBalance = frozenPlanq;
     // slither-disable-start events-maths
-    frozenReserveGoldStartDay = now / 1 days;
-    frozenReserveGoldDays = frozenDays;
+    frozenReservePlanqStartDay = now / 1 days;
+    frozenReservePlanqDays = frozenDays;
     // slither-disable-end events-maths
   }
 
   /**
-   * @notice Sets target allocations for CELO and a diversified basket of non-Celo assets.
+   * @notice Sets target allocations for PLANQ and a diversified basket of non-Planq assets.
    * @param symbols The symbol of each asset in the Reserve portfolio.
    * @param weights The weight for the corresponding asset as unwrapped Fixidity.Fraction.
    */
@@ -270,12 +270,8 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
       require(assetAllocationWeights[symbols[i]] == 0, "Cannot set weight twice");
       assetAllocationWeights[symbols[i]] = weights[i];
     }
-    // NOTE: The CELO asset launched as "Celo Gold" (cGLD), but was renamed to
-    // just CELO by the community.
-    // TODO: Change "cGLD" to "CELO" in this file, after ensuring that any
-    // off chain tools working with asset allocation weights are aware of this
-    // change.
-    require(assetAllocationWeights["cGLD"] != 0, "Must set cGLD asset weight");
+
+    require(assetAllocationWeights["PLQ"] != 0, "Must set PLQ asset weight");
     emit AssetAllocationSet(symbols, weights);
   }
 
@@ -363,8 +359,8 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
 
   /**
    * @notice Checks if an address is able to spend as an exchange.
-   * @dev isExchangeSpender was introduced after cUSD, so the cUSD Exchange is not included in it.
-   * If cUSD's Exchange were to be added to isExchangeSpender, the check with the
+   * @dev isExchangeSpender was introduced after aUSD, so the aUSD Exchange is not included in it.
+   * If aUSD's Exchange were to be added to isExchangeSpender, the check with the
    * registry could be removed.
    * @param spender The address to be checked.
    */
@@ -411,7 +407,7 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
 
   /**
    * @notice Returns addresses of exchanges permitted to spend Reserve funds.
-   * Because exchangeSpenderAddresses was introduced after cUSD, cUSD's exchange
+   * Because exchangeSpenderAddresses was introduced after aUSD, aUSD's exchange
    * is not included in this list.
    * @return An array of addresses permitted to spend Reserve funds.
    */
@@ -420,23 +416,23 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   }
 
   /**
-   * @notice Transfer gold to a whitelisted address subject to reserve spending limits.
-   * @param to The address that will receive the gold.
-   * @param value The amount of gold to transfer.
+   * @notice Transfer planq to a whitelisted address subject to reserve spending limits.
+   * @param to The address that will receive the planq.
+   * @param value The amount of planq to transfer.
    * @return Returns true if the transaction succeeds.
    */
-  function transferGold(address payable to, uint256 value) external returns (bool) {
+  function transferPlanq(address payable to, uint256 value) external returns (bool) {
     require(isSpender[msg.sender], "sender not allowed to transfer Reserve funds");
     require(isOtherReserveAddress[to], "can only transfer to other reserve address");
     uint256 currentDay = now / 1 days;
     if (currentDay > lastSpendingDay) {
-      uint256 balance = getUnfrozenReserveGoldBalance();
+      uint256 balance = getUnfrozenReservePlanqBalance();
       lastSpendingDay = currentDay;
       spendingLimit = spendingRatio.multiply(FixidityLib.newFixed(balance)).fromFixed();
     }
     require(spendingLimit >= value, "Exceeding spending limit");
     spendingLimit = spendingLimit.sub(value);
-    return _transferGold(to, value);
+    return _transferPlanq(to, value);
   }
 
   /**
@@ -506,31 +502,31 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   }
 
   /**
-   * @notice Transfer unfrozen gold to any address.
-   * @param to The address that will receive the gold.
-   * @param value The amount of gold to transfer.
+   * @notice Transfer unfrozen planq to any address.
+   * @param to The address that will receive the planq.
+   * @param value The amount of planq to transfer.
    * @return Returns true if the transaction succeeds.
    */
-  function _transferGold(address payable to, uint256 value) internal returns (bool) {
+  function _transferPlanq(address payable to, uint256 value) internal returns (bool) {
     require(value <= getUnfrozenBalance(), "Exceeding unfrozen reserves");
     // slither-disable-next-line reentrancy-events
     to.sendValue(value);
-    emit ReserveGoldTransferred(msg.sender, to, value);
+    emit ReservePlanqTransferred(msg.sender, to, value);
     return true;
   }
 
   /**
-   * @notice Transfer unfrozen gold to any address, used for one side of CP-DOTO.
+   * @notice Transfer unfrozen planq to any address, used for one side of CP-DOTO.
    * @dev Transfers are not subject to a daily spending limit.
-   * @param to The address that will receive the gold.
-   * @param value The amount of gold to transfer.
+   * @param to The address that will receive the planq.
+   * @param value The amount of planq to transfer.
    * @return Returns true if the transaction succeeds.
    */
-  function transferExchangeGold(
+  function transferExchangePlanq(
     address payable to,
     uint256 value
   ) external isAllowedToSpendExchange(msg.sender) returns (bool) {
-    return _transferGold(to, value);
+    return _transferPlanq(to, value);
   }
 
   /**
@@ -585,42 +581,42 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   }
 
   /**
-   * @notice Returns the amount of unfrozen CELO in the reserve.
-   * @return The total unfrozen CELO in the reserve.
+   * @notice Returns the amount of unfrozen PLANQ in the reserve.
+   * @return The total unfrozen PLANQ in the reserve.
    */
   function getUnfrozenBalance() public view returns (uint256) {
     uint256 balance = address(this).balance;
-    uint256 frozenReserveGold = getFrozenReserveGoldBalance();
-    return balance > frozenReserveGold ? balance.sub(frozenReserveGold) : 0;
+    uint256 frozenReservePlanq = getFrozenReservePlanqBalance();
+    return balance > frozenReservePlanq ? balance.sub(frozenReservePlanq) : 0;
   }
 
   /**
-   * @notice Returns the amount of CELO included in the reserve.
-   * @return The CELO amount included in the reserve.
+   * @notice Returns the amount of PLANQ included in the reserve.
+   * @return The PLANQ amount included in the reserve.
    */
-  function getReserveGoldBalance() public view returns (uint256) {
-    return address(this).balance.add(getOtherReserveAddressesGoldBalance());
+  function getReservePlanqBalance() public view returns (uint256) {
+    return address(this).balance.add(getOtherReserveAddressesPlanqBalance());
   }
 
   /**
-   * @notice Returns the amount of CELO included in other reserve addresses.
-   * @return The CELO amount included in other reserve addresses.
+   * @notice Returns the amount of PLANQ included in other reserve addresses.
+   * @return The PLANQ amount included in other reserve addresses.
    */
-  function getOtherReserveAddressesGoldBalance() public view returns (uint256) {
-    uint256 reserveGoldBalance = 0;
+  function getOtherReserveAddressesPlanqBalance() public view returns (uint256) {
+    uint256 reservePlanqBalance = 0;
     // slither-disable-next-line cache-array-length
     for (uint256 i = 0; i < otherReserveAddresses.length; i = i.add(1)) {
-      reserveGoldBalance = reserveGoldBalance.add(otherReserveAddresses[i].balance);
+      reservePlanqBalance = reservePlanqBalance.add(otherReserveAddresses[i].balance);
     }
-    return reserveGoldBalance;
+    return reservePlanqBalance;
   }
 
   /**
-   * @notice Returns the amount of unfrozen CELO included in the reserve.
-   * @return The unfrozen CELO amount included in the reserve.
+   * @notice Returns the amount of unfrozen PLANQ included in the reserve.
+   * @return The unfrozen PLANQ amount included in the reserve.
    */
-  function getUnfrozenReserveGoldBalance() public view returns (uint256) {
-    return getUnfrozenBalance().add(getOtherReserveAddressesGoldBalance());
+  function getUnfrozenReservePlanqBalance() public view returns (uint256) {
+    return getUnfrozenBalance().add(getOtherReserveAddressesPlanqBalance());
   }
 
   /**
@@ -685,14 +681,14 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   }
 
   /**
-   * @notice Returns the amount of frozen CELO in the reserve.
-   * @return The total frozen CELO in the reserve.
+   * @notice Returns the amount of frozen PLANQ in the reserve.
+   * @return The total frozen PLANQ in the reserve.
    */
-  function getFrozenReserveGoldBalance() public view returns (uint256) {
+  function getFrozenReservePlanqBalance() public view returns (uint256) {
     uint256 currentDay = now / 1 days;
-    uint256 frozenDays = currentDay.sub(frozenReserveGoldStartDay);
-    if (frozenDays >= frozenReserveGoldDays) return 0;
-    return frozenReserveGoldStartBalance.sub(frozenReserveGoldStartBalance.mul(frozenDays).div(frozenReserveGoldDays));
+    uint256 frozenDays = currentDay.sub(frozenReservePlanqStartDay);
+    if (frozenDays >= frozenReservePlanqDays) return 0;
+    return frozenReservePlanqStartBalance.sub(frozenReservePlanqStartBalance.mul(frozenDays).div(frozenReservePlanqDays));
   }
 
   /**
@@ -702,30 +698,30 @@ contract Reserve is IReserve, ICeloVersionedContract, Ownable, Initializable, Us
   function getReserveRatio() public view returns (uint256) {
     address sortedOraclesAddress = registry.getAddressForOrDie(SORTED_ORACLES_REGISTRY_ID);
     ISortedOracles sortedOracles = ISortedOracles(sortedOraclesAddress);
-    uint256 reserveGoldBalance = getUnfrozenReserveGoldBalance();
-    uint256 stableTokensValueInGold = 0;
-    FixidityLib.Fraction memory cgldWeight = FixidityLib.wrap(assetAllocationWeights["cGLD"]);
+    uint256 reservePlanqBalance = getUnfrozenReservePlanqBalance();
+    uint256 stableTokensValueInPlanq = 0;
+    FixidityLib.Fraction memory plqWeight = FixidityLib.wrap(assetAllocationWeights["PLQ"]);
 
     // slither-disable-next-line cache-array-length
     for (uint256 i = 0; i < _tokens.length; i = i.add(1)) {
       uint256 stableAmount;
-      uint256 goldAmount;
+      uint256 planqAmount;
       // slither-disable-next-line calls-loop
-      (stableAmount, goldAmount) = sortedOracles.medianRate(_tokens[i]);
+      (stableAmount, planqAmount) = sortedOracles.medianRate(_tokens[i]);
 
-      if (goldAmount != 0) {
+      if (planqAmount != 0) {
         // tokens with no oracle reports don't count towards collateralization ratio
         // slither-disable-next-line calls-loop
         uint256 stableTokenSupply = IERC20(_tokens[i]).totalSupply();
-        uint256 aStableTokenValueInGold = stableTokenSupply.mul(goldAmount).div(stableAmount);
-        stableTokensValueInGold = stableTokensValueInGold.add(aStableTokenValueInGold);
+        uint256 aStableTokenValueInPlanq = stableTokenSupply.mul(planqAmount).div(stableAmount);
+        stableTokensValueInPlanq = stableTokensValueInPlanq.add(aStableTokenValueInPlanq);
       }
     }
     return
       FixidityLib
-        .newFixed(reserveGoldBalance)
-        .divide(cgldWeight)
-        .divide(FixidityLib.newFixed(stableTokensValueInGold))
+        .newFixed(reservePlanqBalance)
+        .divide(plqWeight)
+        .divide(FixidityLib.newFixed(stableTokensValueInPlanq))
         .unwrap();
   }
 

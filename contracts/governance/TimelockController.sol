@@ -8,7 +8,7 @@ import {
 
 /**
  * @title TimelockController
- * @author Mento Labs
+ * @author Astonic Labs
  * @notice A contract that manages the timelock functionality.
  * @dev Ownable contracts should be owned by TimelockController.
  */
@@ -22,7 +22,7 @@ contract TimelockController is TimelockControllerUpgradeable {
    * @param canceller An additional canceller address with the rights to cancel awaiting proposals.
    */
   // solhint-disable-next-line func-name-mixedcase
-  function __MentoTimelockController_init(
+  function __AstonicTimelockController_init(
     uint256 minDelay,
     address[] memory proposers,
     address[] memory executors,

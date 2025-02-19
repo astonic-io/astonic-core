@@ -8,15 +8,15 @@ interface IReserve {
 
   function removeToken(address, uint256) external returns (bool);
 
-  function transferGold(address payable, uint256) external returns (bool);
+  function transferPlanq(address payable, uint256) external returns (bool);
 
-  function transferExchangeGold(address payable, uint256) external returns (bool);
+  function transferExchangePlanq(address payable, uint256) external returns (bool);
 
   function transferCollateralAsset(address collateralAsset, address payable to, uint256 value) external returns (bool);
 
-  function getReserveGoldBalance() external view returns (uint256);
+  function getReservePlanqBalance() external view returns (uint256);
 
-  function getUnfrozenReserveGoldBalance() external view returns (uint256);
+  function getUnfrozenReservePlanqBalance() external view returns (uint256);
 
   function getOrComputeTobinTax() external returns (uint256, uint256);
 
@@ -51,8 +51,8 @@ interface IReserve {
   function initialize(
     address registryAddress,
     uint256 _tobinTaxStalenessThreshold,
-    uint256 _spendingRatioForCelo,
-    uint256 _frozenGold,
+    uint256 _spendingRatioForPlanq,
+    uint256 _frozenPlanq,
     uint256 _frozenDays,
     bytes32[] calldata _assetAllocationSymbols,
     uint256[] calldata _assetAllocationWeights,
@@ -114,7 +114,7 @@ interface IReserve {
     uint256[] calldata collateralAssetDailySpendingRatios
   ) external;
 
-  function setFrozenGold(uint256 frozenGold, uint256 frozenDays) external;
+  function setFrozenPlanq(uint256 frozenPlanq, uint256 frozenDays) external;
 
   function setAssetAllocations(bytes32[] calldata symbols, uint256[] calldata weights) external;
 

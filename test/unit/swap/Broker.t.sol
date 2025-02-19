@@ -3,13 +3,13 @@
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
 import { MockExchangeProvider } from "test/utils/mocks/MockExchangeProvider.sol";
 import { MockReserve } from "test/utils/mocks/MockReserve.sol";
 import { TestERC20 } from "test/utils/mocks/TestERC20.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 import { IStableTokenV2 } from "contracts/interfaces/IStableTokenV2.sol";
 import { Broker } from "contracts/swap/Broker.sol";

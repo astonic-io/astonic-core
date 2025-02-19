@@ -42,7 +42,7 @@ interface IStableTokenV2 {
    * It keeps the same signature as the original initialize() function
    * in legacy/StableToken.sol
    * @param _name The name of the stable token (English)
-   * @param _symbol A short symbol identifying the token (e.g. "cUSD")
+   * @param _symbol A short symbol identifying the token (e.g. "aUSD")
    * deprecated-param decimals Tokens are divisible to this many decimal places.
    * deprecated-param registryAddress Address of the Registry contract.
    * deprecated-param inflationRate Weekly inflation rate.

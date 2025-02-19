@@ -3,9 +3,9 @@
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 import { MockSortedOracles } from "test/utils/mocks/MockSortedOracles.sol";
 import { IValueDeltaBreaker } from "contracts/interfaces/IValueDeltaBreaker.sol";

@@ -13,7 +13,7 @@ import { IReserve } from "../interfaces/IReserve.sol";
 import { ITradingLimits } from "../interfaces/ITradingLimits.sol";
 
 import { TradingLimits } from "../libraries/TradingLimits.sol";
-import { Initializable } from "celo/contracts/common/Initializable.sol";
+import { Initializable } from "../common/Initializable.sol";
 import { ReentrancyGuard } from "openzeppelin-contracts-next/contracts/security/ReentrancyGuard.sol";
 
 interface IERC20Metadata {
@@ -207,7 +207,7 @@ contract Broker is IBroker, IBrokerAdmin, Initializable, Ownable, ReentrancyGuar
   /* ==================== Private Functions ==================== */
 
   /**
-   * @notice Transfer a specified Mento asset to the given address.
+   * @notice Transfer a specified Astonic asset to the given address.
    * If the specified asset is a stable asset it will be minted directly to the address. If
    * the asset is a collateral asset it will be transferred from the reserve to the given address.
    * @param to The address receiving the asset.
@@ -227,7 +227,7 @@ contract Broker is IBroker, IBrokerAdmin, Initializable, Ownable, ReentrancyGuar
   }
 
   /**
-   * @notice Transfer a specified Mento asset into the reserve or the broker.
+   * @notice Transfer a specified Astonic asset into the reserve or the broker.
    * If the specified asset is a stable asset it will be transfered to the broker
    * and burned. If the asset is a collateral asset it will be transferred to the reserve.
    * @param from The address to transfer the asset from.

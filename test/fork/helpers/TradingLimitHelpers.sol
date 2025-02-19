@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8;
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
 import { Broker } from "contracts/swap/Broker.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8;
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { ExchangeForkTest } from "../ExchangeForkTest.sol";
 
 import { IBiPoolManager } from "contracts/interfaces/IBiPoolManager.sol";

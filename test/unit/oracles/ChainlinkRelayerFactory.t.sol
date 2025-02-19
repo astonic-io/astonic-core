@@ -4,7 +4,7 @@
 pragma solidity ^0.8.18;
 
 import { Ownable } from "openzeppelin-contracts/contracts/access/Ownable.sol";
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
 import { IChainlinkRelayerFactory } from "contracts/interfaces/IChainlinkRelayerFactory.sol";
 import { IChainlinkRelayer } from "contracts/interfaces/IChainlinkRelayer.sol";
@@ -25,7 +25,7 @@ contract ChainlinkRelayerFactoryTest is Test {
   ];
   address[3] rateFeeds = [makeAddr("rateFeed1"), makeAddr("rateFeed2"), makeAddr("rateFeed3")];
   address aRateFeed = rateFeeds[0];
-  string aRateFeedDescription = "CELO/USD";
+  string aRateFeedDescription = "PLQ/USD";
 
   bytes constant NOT_ALLOWED_ERROR = abi.encodeWithSignature("NotAllowed()");
 
@@ -67,7 +67,7 @@ contract ChainlinkRelayerFactoryTest is Test {
     IChainlinkRelayer.ChainlinkAggregator[] memory aggregators,
     address relayerFactoryAddress
   ) internal view returns (address expectedAddress) {
-    bytes32 salt = keccak256("mento.chainlinkRelayer");
+    bytes32 salt = keccak256("astonic.chainlinkRelayer");
     return
       address(
         uint160(

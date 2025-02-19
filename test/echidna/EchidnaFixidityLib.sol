@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8;
-import "celo/contracts/common/FixidityLib.sol";
+import "contracts/libraries/FixidityLib.sol";
 
 // solhint-disable-next-line max-line-length
 //echidna ./test/echidna/EchidnaFixidityLib.sol --contract EchidnaFixidityLib --config ./echidna.yaml --test-mode assertion

@@ -3,8 +3,8 @@
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { addresses, uints } from "mento-std/Array.sol";
-import { Test } from "mento-std/Test.sol";
+import { addresses, uints } from "contracts/libraries/Array.sol";
+import { Test } from "test/utils/Test.sol";
 
 import { StableTokenV2 } from "contracts/tokens/StableTokenV2.sol";
 

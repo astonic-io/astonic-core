@@ -18,7 +18,7 @@ The following is a set of guidelines for contributing to the Mento protocol. Rea
 
 There are many ways you can contribute to the development of Mento. Contributions can be made to this repo via issues and pull requests. However, before contributing, you should have a good understanding of how Mento is intended to work and the different components that make up the core protocol. You can learn more about Mento by taking some time to read the following:
 
-- [Protocol Documentation](https://docs.mento.org/mento-protocol/core/overview)
+- [Protocol Documentation](https://docs.mento.org/planq-network/core/overview)
 - [Stability Whitepaper](https://celo.org/papers/stability)
 
 ### Reporting Bugs

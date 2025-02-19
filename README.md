@@ -1,29 +1,29 @@
-![Seaport](img/Mento-banner.png)
+![Seaport](img/Astonic-banner.png)
 
 [![Foundry][foundry-badge]][foundry]
-[![Mento Core CI][ci-badge]][ci-link]
+[![Astonic Core CI][ci-badge]][ci-link]
 
-# Mento Core
+# Astonic Core
 
-This repo contains the source code of the core smart contracts for the Mento protocol. The repository is built with foundry which is used for the compilation and testing of the smart contracts.
+This repo contains the source code of the core smart contracts for the Astonic protocol. The repository is built with foundry which is used for the compilation and testing of the smart contracts.
 
-## What is Mento?
+## What is Astonic?
 
-The Mento protocol is a smart contract platform built on the Celo blockchain that enables the creation of stable value digital assets. Stable assets created with Mento can be classified as 'Hybrid stable assets' as they are algorithmic, transparent and backed by a over-collateralized, diversified portfolio of exogenous crypto assets([Mento Reserve](https://reserve.mento.org/)).
+The Astonic protocol is a smart contract platform built on the Planq blockchain that enables the creation of stable value digital assets. Stable assets created with Astonic can be classified as 'Hybrid stable assets' as they are algorithmic, transparent and backed by a over-collateralized, diversified portfolio of exogenous crypto assets([Astonic Reserve](https://reserve.astonic.io/)).
 
 ## Documentation
 
-- [Protocol Documentation](https://docs.mento.org/mento/mento-protocol/readme)
-- [Stability Whitepaper](https://celo.org/papers/stability)
+- [Protocol Documentation](https://docs.astonic.io/getting-started/quickstart)
+- [Stability Whitepaper](https://docs.astonic.io/astonic-protocol-concepts/core-stability-framework)
 
 ## Getting Started
 
 ```bash
 # Get the latest code
-git clone git@github.com:mento-protocol/mento-core.git
+git clone git@github.com:planq-network/astonic-core.git
 
 # Change directory to the the newly cloned repo
-cd mento-core
+cd astonic-core
 
 # Install dev dependencies with yarn
 yarn
@@ -62,7 +62,7 @@ slither . --foundry-ignore-compile --triage-mode
 
 For triage mode, in which you can choose to ignore warnings which are added to `slither.db.json`.
 
-[ci-link]: https://github.com/mento-protocol/mento-core/actions/workflows/ci.yml
-[ci-badge]: https://github.com/mento-protocol/mento-core/actions/workflows/ci.yml/badge.svg
+[ci-link]: https://github.com/planq-network/astonic-core/actions/workflows/ci.yml
+[ci-badge]: https://github.com/planq-network/astonic-core/actions/workflows/ci.yml/badge.svg
 [foundry]: https://getfoundry.sh/
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg

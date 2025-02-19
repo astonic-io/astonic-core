@@ -3,7 +3,7 @@ pragma solidity ^0.5.13;
 
 import { Ownable } from "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "../../libraries/FixidityLib.sol";
 
 import { IBreaker } from "../../interfaces/IBreaker.sol";
 import { ISortedOracles } from "../../interfaces/ISortedOracles.sol";
@@ -23,7 +23,7 @@ contract ValueDeltaBreaker is IBreaker, WithCooldown, WithThreshold, Ownable {
 
   /* ==================== State Variables ==================== */
 
-  // Address of the Mento SortedOracles contract
+  // Address of the Astonic SortedOracles contract
   ISortedOracles public sortedOracles;
 
   // The reference value to check against

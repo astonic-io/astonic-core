@@ -2,7 +2,7 @@
 // solhint-disable func-name-mixedcase, var-name-mixedcase, state-visibility, const-name-snakecase, max-states-count
 pragma solidity ^0.8;
 
-import { addresses, uints } from "mento-std/Array.sol";
+import { addresses, uints } from "contracts/libraries/Array.sol";
 
 import { ProtocolTest } from "./ProtocolTest.sol";
 

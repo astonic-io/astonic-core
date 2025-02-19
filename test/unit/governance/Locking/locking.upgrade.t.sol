@@ -5,7 +5,7 @@ pragma solidity 0.8.18;
 import { LockingTest } from "./LockingTest.sol";
 
 contract Upgrade_LockingTest is LockingTest {
-  address public mentoLabs = makeAddr("MentoLabsMultisig");
+  address public astonicLabs = makeAddr("AstonicLabsMultisig");
 
   uint32 public l1Day;
   uint32 public l2Day;
@@ -22,83 +22,83 @@ contract Upgrade_LockingTest is LockingTest {
 
   function test_initialSetup_shouldHaveCorrectValues() public view {
     assertEq(locking.L2_WEEK(), l2Week);
-    assertEq(locking.mentoLabsMultisig(), address(0));
+    assertEq(locking.astonicLabsMultisig(), address(0));
     assertEq(locking.l2TransitionBlock(), 0);
     assertEq(locking.l2StartingPointWeek(), 0);
     assertEq(locking.l2EpochShift(), 0);
     assert(!locking.paused());
   }
 
-  function test_setMentoLabsMultisig_whenCalledByNonOwner_shouldRevert() public {
+  function test_setAstonicLabsMultisig_whenCalledByNonOwner_shouldRevert() public {
     vm.prank(alice);
     vm.expectRevert("Ownable: caller is not the owner");
-    locking.setMentoLabsMultisig(mentoLabs);
+    locking.setAstonicLabsMultisig(astonicLabs);
   }
 
-  function test_setMentoLabsMultisig_whenCalledByOwner_shouldSetMultisigAddress() public {
+  function test_setAstonicLabsMultisig_whenCalledByOwner_shouldSetMultisigAddress() public {
     vm.prank(owner);
-    locking.setMentoLabsMultisig(mentoLabs);
+    locking.setAstonicLabsMultisig(astonicLabs);
 
-    assertEq(locking.mentoLabsMultisig(), mentoLabs);
+    assertEq(locking.astonicLabsMultisig(), astonicLabs);
   }
 
   modifier setMultisig() {
     vm.prank(owner);
-    locking.setMentoLabsMultisig(mentoLabs);
+    locking.setAstonicLabsMultisig(astonicLabs);
     _;
   }
 
-  function test_setL2TransitionBlock_whenCalledByNonMentoMultisig_shouldRevert() public setMultisig {
+  function test_setL2TransitionBlock_whenCalledByNonAstonicMultisig_shouldRevert() public setMultisig {
     vm.prank(alice);
-    vm.expectRevert("caller is not MentoLabs multisig");
+    vm.expectRevert("caller is not AstonicLabs multisig");
     locking.setL2TransitionBlock(block.number);
   }
 
-  function test_setL2TransitionBlock_whenCalledByMentoMultisig_shouldSetL2BlockAndPause() public setMultisig {
+  function test_setL2TransitionBlock_whenCalledByAstonicMultisig_shouldSetL2BlockAndPause() public setMultisig {
     uint32 blockNumber = uint32(block.number + 100);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2TransitionBlock(blockNumber);
 
     assertEq(locking.l2TransitionBlock(), blockNumber);
     assert(locking.paused());
   }
 
-  function test_setL2EpochShift_whenCalledByNonMentoMultisig_shouldRevert() public setMultisig {
+  function test_setL2EpochShift_whenCalledByNonAstonicMultisig_shouldRevert() public setMultisig {
     vm.prank(alice);
-    vm.expectRevert("caller is not MentoLabs multisig");
+    vm.expectRevert("caller is not AstonicLabs multisig");
     locking.setL2EpochShift(100);
   }
 
-  function test_setL2EpochShift_whenCalledByMentoMultisig_shouldSetL2BlockAndPause() public setMultisig {
-    vm.prank(mentoLabs);
+  function test_setL2EpochShift_whenCalledByAstonicMultisig_shouldSetL2BlockAndPause() public setMultisig {
+    vm.prank(astonicLabs);
     locking.setL2EpochShift(100);
 
     assertEq(locking.l2EpochShift(), 100);
   }
 
-  function test_setL2StartingPointWeek_whenCalledByNonMentoMultisig_shouldRevert() public setMultisig {
+  function test_setL2StartingPointWeek_whenCalledByNonAstonicMultisig_shouldRevert() public setMultisig {
     vm.prank(alice);
-    vm.expectRevert("caller is not MentoLabs multisig");
+    vm.expectRevert("caller is not AstonicLabs multisig");
     locking.setL2StartingPointWeek(100);
   }
 
-  function test_setL2StartingPointWeek_whenCalledByMentoMultisig_shouldSetL2BlockAndPause() public setMultisig {
-    vm.prank(mentoLabs);
+  function test_setL2StartingPointWeek_whenCalledByAstonicMultisig_shouldSetL2BlockAndPause() public setMultisig {
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(100);
 
     assertEq(locking.l2StartingPointWeek(), 100);
   }
-  function test_setPaused_whenCalledByNonMentoMultisig_shouldRevert() public setMultisig {
+  function test_setPaused_whenCalledByNonAstonicMultisig_shouldRevert() public setMultisig {
     vm.prank(alice);
-    vm.expectRevert("caller is not MentoLabs multisig");
+    vm.expectRevert("caller is not AstonicLabs multisig");
     locking.setPaused(true);
   }
 
-  function test_setPaused_whenCalledByMentoMultisig_shouldPauseContracts() public setMultisig {
-    mentoToken.mint(alice, 1000000e18);
+  function test_setPaused_whenCalledByAstonicMultisig_shouldPauseContracts() public setMultisig {
+    astonicToken.mint(alice, 1000000e18);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setPaused(true);
 
     assert(locking.paused());
@@ -111,7 +111,7 @@ contract Upgrade_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setPaused(false);
 
     assert(!locking.paused());
@@ -125,17 +125,17 @@ contract Upgrade_LockingTest is LockingTest {
 
   modifier l2LockingSetup(uint32 advanceWeeks, uint32 startingPointWeek, uint32 l1Shift) {
     vm.prank(owner);
-    locking.setMentoLabsMultisig(mentoLabs);
+    locking.setAstonicLabsMultisig(astonicLabs);
 
     _incrementBlock(l1Week * advanceWeeks);
 
     locking.setStatingPointWeek(startingPointWeek);
     locking.setEpochShift(l1Shift);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2TransitionBlock(block.number);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setPaused(false);
 
     _;
@@ -170,7 +170,7 @@ contract Upgrade_LockingTest is LockingTest {
     assertEq(locking.blockTillNextPeriod(), l2Week);
 
     // l2WeekNo - l1WeekNo = 40 - 10 = 30
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(30);
 
     // after the L2 starting point week is set, the week should be equal to the l1 week no
@@ -185,7 +185,7 @@ contract Upgrade_LockingTest is LockingTest {
     assertEq(locking.blockTillNextPeriod(), l2Week);
 
     // l2WeekNo - l1WeekNo = 4 - 20 = -16
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(-16);
 
     // after the L2 starting point week is set, the week should be equal to the l1 week no
@@ -201,10 +201,10 @@ contract Upgrade_LockingTest is LockingTest {
     assertEq(locking.blockTillNextPeriod(), l2Week);
 
     // l2WeekNo - l1WeekNo = 4 - 14 - 1 = -11
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(-11);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2EpochShift(l2Day * 3);
 
     // after the L2 starting point week and l2EpochShift are set, the timing should be equal to the l1 timing
@@ -228,7 +228,7 @@ contract Upgrade_LockingTest is LockingTest {
   }
 
   function test_totalSupply_whenCalledAfterL2Transition_shouldReturnCorrectValues() public setMultisig {
-    mentoToken.mint(alice, 1000000e18);
+    astonicToken.mint(alice, 1000000e18);
 
     // week no: 20
     _incrementBlock(l1Week * 18);
@@ -251,14 +251,14 @@ contract Upgrade_LockingTest is LockingTest {
     // roll back to week 40
     _reduceBlock(l1Week * 20);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2TransitionBlock(l1Week * 40);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setPaused(false);
 
     // 8 - 40 = -32
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(-32);
 
     assertEq(locking.totalSupply(), totalSupplyL1W40);
@@ -271,7 +271,7 @@ contract Upgrade_LockingTest is LockingTest {
   }
 
   function test_balanceOfAndGetVotes_whenCalledAfterL2Transition_shouldReturnCorrectValues() public setMultisig {
-    mentoToken.mint(alice, 1000000e18);
+    astonicToken.mint(alice, 1000000e18);
 
     //  week no: 20
     _incrementBlock(l1Week * 18);
@@ -296,14 +296,14 @@ contract Upgrade_LockingTest is LockingTest {
     // roll back to week 40
     _reduceBlock(l1Week * 20);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2TransitionBlock(l1Week * 40);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setPaused(false);
 
     // 8 - 40 = -32
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(-32);
 
     assertEq(locking.balanceOf(alice), balanceOfL1W40);
@@ -318,7 +318,7 @@ contract Upgrade_LockingTest is LockingTest {
   }
 
   function test_lockedAndWithdrawable_whenCalledAfterL2Transition_shouldReturnCorrectValues() public setMultisig {
-    mentoToken.mint(alice, 1000000e18);
+    astonicToken.mint(alice, 1000000e18);
 
     //  week no: 20
     _incrementBlock(l1Week * 18);
@@ -341,14 +341,14 @@ contract Upgrade_LockingTest is LockingTest {
     // roll back to week 40
     _reduceBlock(l1Week * 20);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2TransitionBlock(l1Week * 40);
 
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setPaused(false);
 
     // 8 - 40 = -32
-    vm.prank(mentoLabs);
+    vm.prank(astonicLabs);
     locking.setL2StartingPointWeek(-32);
 
     assertEq(locking.locked(alice), lockedL1W40);

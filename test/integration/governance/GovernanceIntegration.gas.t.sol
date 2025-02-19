@@ -2,12 +2,12 @@
 pragma solidity 0.8.18;
 // solhint-disable func-name-mixedcase, max-line-length, max-states-count
 
-import { addresses, uints } from "mento-std/Array.sol";
+import { addresses, uints } from "contracts/libraries/Array.sol";
 import { Vm } from "forge-std/Vm.sol";
 
-import { MentoGovernor } from "contracts/governance/MentoGovernor.sol";
+import { AstonicGovernor } from "contracts/governance/AstonicGovernor.sol";
 import { GovernanceFactory } from "contracts/governance/GovernanceFactory.sol";
-import { MentoToken } from "contracts/governance/MentoToken.sol";
+import { AstonicToken } from "contracts/governance/AstonicToken.sol";
 import { Airgrab } from "contracts/governance/Airgrab.sol";
 import { Emission } from "contracts/governance/Emission.sol";
 import { Locking } from "contracts/governance/locking/Locking.sol";
@@ -25,17 +25,17 @@ contract GovernanceGasTest is GovernanceTest {
   GovernanceFactory public factory;
 
   ProxyAdmin public proxyAdmin;
-  MentoToken public mentoToken;
+  AstonicToken public astonicToken;
   Emission public emission;
   Airgrab public airgrab;
   TimelockController public governanceTimelock;
   address public governanceTimelockAddress;
-  MentoGovernor public mentoGovernor;
+  AstonicGovernor public astonicGovernor;
   Locking public locking;
 
-  address public celoGovernance = makeAddr("CeloGovernance");
+  address public planqGovernance = makeAddr("PlanqGovernance");
   address public watchdogMultisig = makeAddr("WatchdogMultisig");
-  address public mentoLabsMultisig = makeAddr("MentoLabsMultisig");
+  address public astonicLabsMultisig = makeAddr("AstonicLabsMultisig");
   address public fractalSigner = makeAddr("FractalSigner");
 
   bytes32 public merkleRoot = 0x945d83ced94efc822fed712b4c4694b4e1129607ec5bbd2ab971bb08dca4d809;
@@ -48,10 +48,10 @@ contract GovernanceGasTest is GovernanceTest {
 
   modifier s_attack() {
     vm.prank(governanceTimelockAddress);
-    mentoToken.transfer(alice, 100_000e18);
+    astonicToken.transfer(alice, 100_000e18);
 
     vm.prank(governanceTimelockAddress);
-    mentoToken.transfer(bob, 100_000e18);
+    astonicToken.transfer(bob, 100_000e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 20_000e18, 1, 103);
@@ -72,25 +72,25 @@ contract GovernanceGasTest is GovernanceTest {
     vm.roll(21871402); // (Oct-11-2023 WED 12:00:01 PM +UTC)
     vm.warp(1697025601); // (Oct-11-2023 WED 12:00:01 PM +UTC)
 
-    GovernanceFactory.MentoTokenAllocationParams memory allocationParams = GovernanceFactory
-      .MentoTokenAllocationParams({
+    GovernanceFactory.AstonicTokenAllocationParams memory allocationParams = GovernanceFactory
+      .AstonicTokenAllocationParams({
         airgrabAllocation: 50,
-        mentoTreasuryAllocation: 100,
-        additionalAllocationRecipients: addresses(address(mentoLabsMultisig)),
+        astonicTreasuryAllocation: 100,
+        additionalAllocationRecipients: addresses(address(astonicLabsMultisig)),
         additionalAllocationAmounts: uints(200)
       });
 
     vm.prank(owner);
-    factory = new GovernanceFactory(celoGovernance);
+    factory = new GovernanceFactory(planqGovernance);
 
-    vm.prank(celoGovernance);
-    factory.createGovernance(watchdogMultisig, merkleRoot, fractalSigner, allocationParams);
+    vm.prank(planqGovernance);
+    factory.createGovernance(watchdogMultisig, allocationParams);
     proxyAdmin = factory.proxyAdmin();
-    mentoToken = factory.mentoToken();
+    astonicToken = factory.astonicToken();
     emission = factory.emission();
     airgrab = factory.airgrab();
     governanceTimelock = factory.governanceTimelock();
-    mentoGovernor = factory.mentoGovernor();
+    astonicGovernor = factory.astonicGovernor();
     locking = factory.locking();
 
     // Without this cast, tests do not work as expected
@@ -98,19 +98,19 @@ contract GovernanceGasTest is GovernanceTest {
     governanceTimelockAddress = address(governanceTimelock);
 
     vm.prank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     vm.prank(bob);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
   }
 
-  // PoC from: https://github.com/sherlock-audit/2024-02-mento-judging/issues/4
+  // PoC from: https://github.com/sherlock-audit/2024-02-astonic-judging/issues/4
   function test_totalSupply_whenUsedWith50_000Locks_shouldCostReasonableGas() public s_attack {
     uint256 gasLeftBefore = gasleft();
     locking.totalSupply();
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -121,7 +121,7 @@ contract GovernanceGasTest is GovernanceTest {
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -132,14 +132,14 @@ contract GovernanceGasTest is GovernanceTest {
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
   }
 
-  // PoC from https://github.com/sherlock-audit/2024-02-mento-judging/issues/2
+  // PoC from https://github.com/sherlock-audit/2024-02-astonic-judging/issues/2
   function test_getVotes_whenUsedWith50_000Locks_shouldCostReasonableGas() public s_attack {
     uint256 gasLeftBefore = gasleft();
     locking.getVotes(bob);
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -150,7 +150,7 @@ contract GovernanceGasTest is GovernanceTest {
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -167,7 +167,7 @@ contract GovernanceGasTest is GovernanceTest {
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -182,7 +182,7 @@ contract GovernanceGasTest is GovernanceTest {
     vm.timeTravel(BLOCKS_DAY);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -201,7 +201,7 @@ contract GovernanceGasTest is GovernanceTest {
     assertLt(gasLeftBefore - gasleft(), viewCallGas);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -216,7 +216,7 @@ contract GovernanceGasTest is GovernanceTest {
     vm.timeTravel(BLOCKS_DAY);
 
     vm.startPrank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     for (uint256 i; i < 1_000; i++) {
       locking.lock(alice, bob, 1e18, 100, 100);
     }
@@ -247,7 +247,7 @@ contract GovernanceGasTest is GovernanceTest {
       uint256[] memory values,
       bytes[] memory calldatas,
       string memory description
-    ) = Proposals._proposeChangeEmissionTarget(mentoGovernor, emission, newEmissionTarget);
+    ) = Proposals._proposeChangeEmissionTarget(astonicGovernor, emission, newEmissionTarget);
     assertLt(gasLeftBefore - gasleft(), proposalCreationGas);
 
     // ~10 mins
@@ -259,12 +259,12 @@ contract GovernanceGasTest is GovernanceTest {
 
     gasLeftBefore = gasleft();
     vm.prank(alice);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
     assertLt(gasLeftBefore - gasleft(), voteGas);
 
     gasLeftBefore = gasleft();
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
     assertLt(gasLeftBefore - gasleft(), voteGas);
 
     // voting period ends
@@ -275,7 +275,7 @@ contract GovernanceGasTest is GovernanceTest {
     locking.lock(alice, bob, 1e18, 1, 103);
 
     gasLeftBefore = gasleft();
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
     assertLt(gasLeftBefore - gasleft(), proposalQueueGas);
 
     vm.timeTravel(2 * BLOCKS_DAY);
@@ -286,7 +286,7 @@ contract GovernanceGasTest is GovernanceTest {
 
     gasLeftBefore = gasleft();
     vm.prank(makeAddr("Random"));
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
     assertLt(gasLeftBefore - gasleft(), proposalExecutionGas);
   }
 
@@ -301,7 +301,7 @@ contract GovernanceGasTest is GovernanceTest {
       uint256[] memory values,
       bytes[] memory calldatas,
       string memory description
-    ) = Proposals._proposeChangeEmissionTarget(mentoGovernor, emission, newEmissionTarget);
+    ) = Proposals._proposeChangeEmissionTarget(astonicGovernor, emission, newEmissionTarget);
     assertLt(gasLeftBefore - gasleft(), proposalCreationGas);
 
     // ~10 mins
@@ -315,7 +315,7 @@ contract GovernanceGasTest is GovernanceTest {
 
     gasLeftBefore = gasleft();
     vm.prank(alice);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
     assertLt(gasLeftBefore - gasleft(), voteGas);
 
     // ~10 mins
@@ -323,21 +323,21 @@ contract GovernanceGasTest is GovernanceTest {
 
     gasLeftBefore = gasleft();
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
     assertLt(gasLeftBefore - gasleft(), voteGas);
 
     // voting period ends
     vm.timeTravel(BLOCKS_WEEK);
 
     gasLeftBefore = gasleft();
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
     assertLt(gasLeftBefore - gasleft(), proposalQueueGas);
 
     vm.timeTravel(2 * BLOCKS_DAY);
 
     gasLeftBefore = gasleft();
     vm.prank(makeAddr("Random"));
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
     assertLt(gasLeftBefore - gasleft(), proposalExecutionGas);
   }
 }

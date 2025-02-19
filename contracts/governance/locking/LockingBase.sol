@@ -17,11 +17,11 @@ import "./libs/LibBrokenLine.sol";
 abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
   using LibBrokenLine for LibBrokenLine.BrokenLine;
   /**
-   * @dev Duration of a week in blocks on the CELO blockchain before the L2 transition (5 seconds per block)
+   * @dev Duration of a week in blocks on the PLANQ blockchain (5 seconds per block)
    */
   uint32 public constant WEEK = 120_960;
   /**
-   * @dev Duration of a week in blocks on the CELO blockchain after the L2 transition (1 seconds per block)
+   * @dev Duration of a week in blocks on the PLANQ blockchain after the L2 transition (1 seconds per block)
    */
   uint32 public constant L2_WEEK = 604_800;
   /**
@@ -75,7 +75,7 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
   mapping(uint256 => Lock) locks;
   /**
    * @dev Struct used to represent an account's locked and unlocked token balances
-   * balance - BrokenLine representing the linear function of the veMento balance
+   * balance - BrokenLine representing the linear function of the veAstonic balance
    * locked - BrokenLine representing the linear function of the locked token balance
    * amount - amount of locked tokens
    */
@@ -89,7 +89,7 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
    */
   mapping(address => Account) accounts;
   /**
-   * @dev Total supply line of veMento
+   * @dev Total supply line of veAstonic
    */
   LibBrokenLine.BrokenLine public totalSupplyLine;
 
@@ -109,9 +109,9 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
    */
   uint32 public l2EpochShift;
   /**
-   * @dev Address of the Mento Labs multisig
+   * @dev Address of the Astonic Labs multisig
    */
-  address public mentoLabsMultisig;
+  address public astonicLabsMultisig;
   /**
    * @dev Flag to pause locking and governance
    */
@@ -159,9 +159,9 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
    */
   event SetMinSlopePeriod(uint256 indexed newMinSlopePeriod);
   /**
-   * @dev set new Mento Labs multisig address
+   * @dev set new Astonic Labs multisig address
    */
-  event SetMentoLabsMultisig(address indexed mentoLabsMultisig);
+  event SetAstonicLabsMultisig(address indexed astonicLabsMultisig);
   /**
    * @dev set new L2 transition block number
    */
@@ -181,7 +181,7 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
 
   /**
    * @dev Initializes the contract with token, starting point week, and minimum cliff and slope periods.
-   * @param _token ERC20 token to be locked. (Mento Token)
+   * @param _token ERC20 token to be locked. (Astonic Token)
    * @param _startingPointWeek Origin week number for the week-based time system.
    * @param _minCliffPeriod Minimum cliff period for locks.
    * @param _minSlopePeriod Minimum slope period for locks.
@@ -202,8 +202,8 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
     minSlopePeriod = _minSlopePeriod;
   }
 
-  modifier onlyMentoLabs() {
-    require(msg.sender == mentoLabsMultisig, "caller is not MentoLabs multisig");
+  modifier onlyAstonicLabs() {
+    require(msg.sender == astonicLabsMultisig, "caller is not AstonicLabs multisig");
     _;
   }
 
@@ -434,19 +434,19 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
   }
 
   /**
-   * @notice Sets the Mento Labs multisig address
-   * @param mentoLabsMultisig_ address of the Mento Labs multisig
+   * @notice Sets the Astonic Labs multisig address
+   * @param astonicLabsMultisig_ address of the Astonic Labs multisig
    */
-  function setMentoLabsMultisig(address mentoLabsMultisig_) external onlyOwner {
-    mentoLabsMultisig = mentoLabsMultisig_;
-    emit SetMentoLabsMultisig(mentoLabsMultisig_);
+  function setAstonicLabsMultisig(address astonicLabsMultisig_) external onlyOwner {
+    astonicLabsMultisig = astonicLabsMultisig_;
+    emit SetAstonicLabsMultisig(astonicLabsMultisig_);
   }
 
   /**
    * @notice Sets the L2 transition block number and pauses locking and governance
    * @param l2TransitionBlock_ block number of the L2 transition
    */
-  function setL2TransitionBlock(uint256 l2TransitionBlock_) external onlyMentoLabs {
+  function setL2TransitionBlock(uint256 l2TransitionBlock_) external onlyAstonicLabs {
     l2TransitionBlock = l2TransitionBlock_;
     paused = true;
 
@@ -457,7 +457,7 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
    * @notice Sets the L2 epoch shift amount
    * @param l2EpochShift_ shift amount that will be used after L2 transition
    */
-  function setL2EpochShift(uint32 l2EpochShift_) external onlyMentoLabs {
+  function setL2EpochShift(uint32 l2EpochShift_) external onlyAstonicLabs {
     l2EpochShift = l2EpochShift_;
 
     emit SetL2EpochShift(l2EpochShift_);
@@ -467,7 +467,7 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
    * @notice Sets the L2 starting point week number
    * @param l2StartingPointWeek_ starting point week number that will be used after L2 transition
    */
-  function setL2StartingPointWeek(int256 l2StartingPointWeek_) external onlyMentoLabs {
+  function setL2StartingPointWeek(int256 l2StartingPointWeek_) external onlyAstonicLabs {
     l2StartingPointWeek = l2StartingPointWeek_;
 
     emit SetL2StartingPointWeek(l2StartingPointWeek_);
@@ -477,7 +477,7 @@ abstract contract LockingBase is OwnableUpgradeable, IVotesUpgradeable {
    * @notice Sets the paused flag
    * @param paused_ flag to pause locking and governance
    */
-  function setPaused(bool paused_) external onlyMentoLabs {
+  function setPaused(bool paused_) external onlyAstonicLabs {
     paused = paused_;
 
     emit SetPaused(paused_);

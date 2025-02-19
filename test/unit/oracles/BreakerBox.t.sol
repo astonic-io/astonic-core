@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // solhint-disable func-name-mixedcase, var-name-mixedcase, state-visibility
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.18;
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
 import { MockBreaker } from "test/utils/mocks/MockBreaker.sol";
 import { MockSortedOracles } from "test/utils/mocks/MockSortedOracles.sol";

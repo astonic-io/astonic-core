@@ -2,18 +2,18 @@
 pragma solidity 0.8.18;
 // solhint-disable func-name-mixedcase, max-line-length
 
-import { uints, addresses, bytesList } from "mento-std/Array.sol";
+import { uints, addresses, bytesList } from "contracts/libraries/Array.sol";
 
 import { ProxyAdmin } from "openzeppelin-contracts-next/contracts/proxy/transparent/ProxyAdmin.sol";
 
-import { MentoGovernor } from "contracts/governance/MentoGovernor.sol";
+import { AstonicGovernor } from "contracts/governance/AstonicGovernor.sol";
 import { TimelockController } from "contracts/governance/TimelockController.sol";
 import { Locking } from "contracts/governance/locking/Locking.sol";
 import { Emission } from "contracts/governance/Emission.sol";
 
 library Proposals {
   function _proposeChangeEmissionTarget(
-    MentoGovernor mentoGovernor,
+    AstonicGovernor astonicGovernor,
     Emission emission,
     address newTarget
   )
@@ -31,7 +31,7 @@ library Proposals {
     calldatas = bytesList(abi.encodeWithSelector(emission.setEmissionTarget.selector, newTarget));
     description = "Change emission target";
 
-    proposalId = mentoGovernor.propose(targets, values, calldatas, description);
+    proposalId = astonicGovernor.propose(targets, values, calldatas, description);
   }
 
   struct changeSettingsVars {
@@ -45,7 +45,7 @@ library Proposals {
   }
 
   struct changeSettingsContracts {
-    MentoGovernor mentoGovernor;
+    AstonicGovernor astonicGovernor;
     TimelockController timelockController;
     Locking locking;
   }
@@ -64,31 +64,31 @@ library Proposals {
     )
   {
     targets = addresses(
-      address(_targets.mentoGovernor),
-      address(_targets.mentoGovernor),
-      address(_targets.mentoGovernor),
-      address(_targets.mentoGovernor),
+      address(_targets.astonicGovernor),
+      address(_targets.astonicGovernor),
+      address(_targets.astonicGovernor),
+      address(_targets.astonicGovernor),
       address(_targets.timelockController),
       address(_targets.locking),
       address(_targets.locking)
     );
     values = uints(0, 0, 0, 0, 0, 0, 0);
     calldatas = bytesList(
-      abi.encodeWithSelector(_targets.mentoGovernor.setVotingDelay.selector, vars.votingDelay),
-      abi.encodeWithSelector(_targets.mentoGovernor.setVotingPeriod.selector, vars.votingPeriod),
-      abi.encodeWithSelector(_targets.mentoGovernor.setProposalThreshold.selector, vars.threshold),
-      abi.encodeWithSelector(_targets.mentoGovernor.updateQuorumNumerator.selector, vars.quorum),
+      abi.encodeWithSelector(_targets.astonicGovernor.setVotingDelay.selector, vars.votingDelay),
+      abi.encodeWithSelector(_targets.astonicGovernor.setVotingPeriod.selector, vars.votingPeriod),
+      abi.encodeWithSelector(_targets.astonicGovernor.setProposalThreshold.selector, vars.threshold),
+      abi.encodeWithSelector(_targets.astonicGovernor.updateQuorumNumerator.selector, vars.quorum),
       abi.encodeWithSelector(_targets.timelockController.updateDelay.selector, vars.minDelay),
       abi.encodeWithSelector(_targets.locking.setMinCliffPeriod.selector, vars.minCliff),
       abi.encodeWithSelector(_targets.locking.setMinSlopePeriod.selector, vars.minSlope)
     );
     description = "Change governance config";
 
-    proposalId = _targets.mentoGovernor.propose(targets, values, calldatas, description);
+    proposalId = _targets.astonicGovernor.propose(targets, values, calldatas, description);
   }
 
   function _proposeUpgradeContracts(
-    MentoGovernor mentoGovernor,
+    AstonicGovernor astonicGovernor,
     ProxyAdmin proxyAdmin,
     address[] memory proxies,
     address[] memory newImplementations
@@ -111,12 +111,12 @@ library Proposals {
     }
     description = "Upgrade upgradeable contracts";
 
-    proposalId = mentoGovernor.propose(targets, values, calldatas, description);
+    proposalId = astonicGovernor.propose(targets, values, calldatas, description);
   }
 
   function _proposeCancelQueuedTx(
-    MentoGovernor mentoGovernor,
-    TimelockController mentoLabsTreasury,
+    AstonicGovernor astonicGovernor,
+    TimelockController astonicLabsTreasury,
     bytes32 id
   )
     internal
@@ -128,11 +128,11 @@ library Proposals {
       string memory description
     )
   {
-    targets = addresses(address(mentoLabsTreasury));
+    targets = addresses(address(astonicLabsTreasury));
     values = uints(0);
-    calldatas = bytesList(abi.encodeWithSelector(mentoLabsTreasury.cancel.selector, id));
+    calldatas = bytesList(abi.encodeWithSelector(astonicLabsTreasury.cancel.selector, id));
     description = "Cancel queued tx";
 
-    proposalId = mentoGovernor.propose(targets, values, calldatas, description);
+    proposalId = astonicGovernor.propose(targets, values, calldatas, description);
   }
 }

@@ -3,18 +3,18 @@ pragma solidity 0.8.18;
 // solhint-disable max-line-length, gas-custom-errors
 // slither-disable-start reentrancy-events
 
-import { MentoToken } from "./MentoToken.sol";
+import { AstonicToken } from "./AstonicToken.sol";
 import { Emission } from "./Emission.sol";
 import { Airgrab } from "./Airgrab.sol";
 import { TimelockController } from "./TimelockController.sol";
-import { MentoGovernor } from "./MentoGovernor.sol";
+import { AstonicGovernor } from "./AstonicGovernor.sol";
 import { Locking } from "./locking/Locking.sol";
 
 import { AirgrabDeployerLib } from "./deployers/AirgrabDeployerLib.sol";
 import { EmissionDeployerLib } from "./deployers/EmissionDeployerLib.sol";
 import { LockingDeployerLib } from "./deployers/LockingDeployerLib.sol";
-import { MentoGovernorDeployerLib } from "./deployers/MentoGovernorDeployerLib.sol";
-import { MentoTokenDeployerLib } from "./deployers/MentoTokenDeployerLib.sol";
+import { AstonicGovernorDeployerLib } from "./deployers/AstonicGovernorDeployerLib.sol";
+import { AstonicTokenDeployerLib } from "./deployers/AstonicTokenDeployerLib.sol";
 import { TimelockControllerDeployerLib } from "./deployers/TimelockControllerDeployerLib.sol";
 import { ProxyDeployerLib } from "./deployers/ProxyDeployerLib.sol";
 
@@ -27,46 +27,46 @@ import { Ownable } from "openzeppelin-contracts-next/contracts/access/Ownable.so
 
 /**
  * @title GovernanceFactory
- * @author Mento Labs
+ * @author Astonic Labs
  * @notice Factory for creating and initializing the entire governance system
- * including the MENTO token, locking, emission, airgrab, and governance-related contracts.
+ * including the ATC token, locking, emission, airgrab, and governance-related contracts.
  **/
 contract GovernanceFactory is Ownable {
   /// @dev Event emitted when the governance system has been successfully created
   event GovernanceCreated(
     address proxyAdmin,
     address emission,
-    address mentoToken,
+    address astonicToken,
     address airgrab,
     address locking,
     address governanceTimelock,
-    address mentoGovernor
+    address astonicGovernor
   );
 
   /// @dev Parameters for the initial token allocation
-  struct MentoTokenAllocationParams {
+  struct AstonicTokenAllocationParams {
     uint256 airgrabAllocation;
-    uint256 mentoTreasuryAllocation;
+    uint256 astonicTreasuryAllocation;
     address[] additionalAllocationRecipients;
     uint256[] additionalAllocationAmounts;
   }
 
   /// @dev Precalculated addresses by nonce for the contracts to be deployed
   struct PrecalculatedAddresses {
-    address mentoToken;
+    address astonicToken;
     address emission;
     address airgrab;
     address locking;
     address governanceTimelock;
-    address mentoGovernor;
+    address astonicGovernor;
   }
 
   ProxyAdmin public proxyAdmin;
-  MentoToken public mentoToken;
+  AstonicToken public astonicToken;
   Emission public emission;
   Airgrab public airgrab;
   TimelockController public governanceTimelock;
-  MentoGovernor public mentoGovernor;
+  AstonicGovernor public astonicGovernor;
   Locking public locking;
 
   address public watchdogMultiSig;
@@ -77,7 +77,7 @@ contract GovernanceFactory is Ownable {
   // Airgrab configuration
   uint32 public constant AIRGRAB_LOCK_SLOPE = 104; // Slope duration for the airgrabbed tokens in weeks
   uint32 public constant AIRGRAB_LOCK_CLIFF = 0; // Cliff duration for the airgrabbed tokens in weeks
-  uint256 public constant AIRGRAB_DURATION = 10 weeks;
+  uint256 public constant AIRGRAB_DURATION = 26 weeks;
   uint256 public constant FRACTAL_MAX_AGE = 180 days; // Maximum age of the kyc for the airgrab
   uint256 public airgrabEnds;
 
@@ -86,13 +86,13 @@ contract GovernanceFactory is Ownable {
 
   // Governor configuration
   uint256 public constant GOVERNOR_VOTING_DELAY = 0; // Delay time in blocks between proposal creation and the start of voting.
-  uint256 public constant GOVERNOR_VOTING_PERIOD = 120_960; // Voting period in blocks for the governor (7 days in blocks CELO)
+  uint256 public constant GOVERNOR_VOTING_PERIOD = 120_960; // Voting period in blocks for the governor (7 days in blocks PLANQ)
   uint256 public constant GOVERNOR_PROPOSAL_THRESHOLD = 10_000e18;
   uint256 public constant GOVERNOR_QUORUM = 2; // Quorum percentage for the governor
 
   /**
    * @notice Creates the factory contract with the owner address
-   * @param owner_ Address of the owner, will be Celo governance
+   * @param owner_ Address of the owner, will be Astonic governance
    */
   constructor(address owner_) {
     transferOwnership(owner_);
@@ -100,18 +100,14 @@ contract GovernanceFactory is Ownable {
 
   /**
    * @notice Creates and initializes the governance system contracts
-   * @param watchdogMultiSig_ Address of the Mento community's multisig wallet with the veto rights
-   * @param airgrabRoot Root hash for the airgrab Merkle tree
-   * @param fractalSigner Signer of fractal kyc
+   * @param watchdogMultiSig_ Address of the Astonic community's multisig wallet with the veto rights
    * @param allocationParams Parameters for the initial token allocation
    * @dev Can only be called by the owner and only once
    */
   // solhint-disable-next-line function-max-lines
   function createGovernance(
     address watchdogMultiSig_,
-    bytes32 airgrabRoot,
-    address fractalSigner,
-    MentoTokenAllocationParams calldata allocationParams
+    AstonicTokenAllocationParams calldata allocationParams
   ) external onlyOwner {
     require(!initialized, "Factory: governance already created");
     initialized = true;
@@ -122,22 +118,22 @@ contract GovernanceFactory is Ownable {
     PrecalculatedAddresses memory addr = getPrecalculatedAddresses();
 
     deployProxyAdmin();
-    deployMentoToken(allocationParams, addr);
+    deployAstonicToken(allocationParams, addr);
     deployEmission(addr);
-    deployAirgrab(airgrabRoot, fractalSigner, addr);
+    deployAirgrab(addr);
     deployLocking(addr);
     deployTimelock(addr);
-    deployMentoGovernor(addr);
+    deployAstonicGovernor(addr);
     transferOwnership();
 
     emit GovernanceCreated(
       address(proxyAdmin),
       address(emission),
-      address(mentoToken),
+      address(astonicToken),
       address(airgrab),
       address(locking),
       address(governanceTimelock),
-      address(mentoGovernor)
+      address(astonicGovernor)
     );
   }
 
@@ -152,16 +148,16 @@ contract GovernanceFactory is Ownable {
   }
 
   /**
-   * @notice Deploys the MentoToken contract.
+   * @notice Deploys the AstonicToken contract.
    * @param allocationParams Parameters for the initial token allocation
    * @param addr Precalculated addresses for the contracts to be deployed.
    */
-  function deployMentoToken(
-    MentoTokenAllocationParams memory allocationParams,
+  function deployAstonicToken(
+    AstonicTokenAllocationParams memory allocationParams,
     PrecalculatedAddresses memory addr
   ) internal {
     // ===========================================
-    // ========== Deploy 2: MentoToken ===========
+    // ========== Deploy 2: AstonicToken ===========
     // ===========================================
     uint256 numberOfRecipients = allocationParams.additionalAllocationRecipients.length + 2;
     address[] memory allocationRecipients = new address[](numberOfRecipients);
@@ -170,16 +166,16 @@ contract GovernanceFactory is Ownable {
     allocationRecipients[0] = addr.airgrab;
     allocationAmounts[0] = allocationParams.airgrabAllocation;
     allocationRecipients[1] = addr.governanceTimelock;
-    allocationAmounts[1] = allocationParams.mentoTreasuryAllocation;
+    allocationAmounts[1] = allocationParams.astonicTreasuryAllocation;
 
     for (uint256 i = 0; i < allocationParams.additionalAllocationRecipients.length; i++) {
       allocationRecipients[i + 2] = allocationParams.additionalAllocationRecipients[i];
       allocationAmounts[i + 2] = allocationParams.additionalAllocationAmounts[i];
     }
 
-    mentoToken = MentoTokenDeployerLib.deploy(allocationRecipients, allocationAmounts, addr.emission, addr.locking); // NONCE:2
+    astonicToken = AstonicTokenDeployerLib.deploy(allocationRecipients, allocationAmounts, addr.emission, addr.locking); // NONCE:2
 
-    assert(address(mentoToken) == addr.mentoToken);
+    assert(address(astonicToken) == addr.astonicToken);
   }
 
   /**
@@ -197,9 +193,9 @@ contract GovernanceFactory is Ownable {
         address(proxyAdmin),
         abi.encodeWithSelector(
           emissionImpl.initialize.selector,
-          addr.mentoToken, ///               @param mentoToken_ The address of the MentoToken contract.
-          addr.governanceTimelock, ///  @param governanceTimelock_ The address of the mento treasury contract.
-          mentoToken.emissionSupply() ///       @param emissionSupply_ The total amount of tokens that can be emitted.
+          addr.astonicToken, ///               @param astonicToken_ The address of the AstonicToken contract.
+          addr.governanceTimelock, ///  @param governanceTimelock_ The address of the astonic treasury contract.
+          astonicToken.emissionSupply() ///       @param emissionSupply_ The total amount of tokens that can be emitted.
         )
       );
 
@@ -209,25 +205,21 @@ contract GovernanceFactory is Ownable {
 
   /**
    * @notice Deploys the Airgrab contract.
-   * @param airgrabRoot Root hash for the airgrab Merkle tree.
-   * @param fractalSigner Signer of fractal kyc.
    * @param addr Precalculated addresses for the contracts to be deployed.
    */
-  function deployAirgrab(bytes32 airgrabRoot, address fractalSigner, PrecalculatedAddresses memory addr) internal {
+  function deployAirgrab(PrecalculatedAddresses memory addr) internal {
     // ========================================
     // ========== Deploy 4: Airgrab ===========
     // ========================================
     airgrabEnds = block.timestamp + AIRGRAB_DURATION;
     // slither-disable-next-line reentrancy-benign
     airgrab = AirgrabDeployerLib.deploy( // NONCE:5
-        airgrabRoot,
-        fractalSigner,
-        FRACTAL_MAX_AGE,
         airgrabEnds,
         AIRGRAB_LOCK_CLIFF,
         AIRGRAB_LOCK_SLOPE,
-        addr.mentoToken,
+        addr.astonicToken,
         addr.locking,
+        address(0x0),
         payable(addr.governanceTimelock)
       );
     assert(address(airgrab) == addr.airgrab);
@@ -249,7 +241,7 @@ contract GovernanceFactory is Ownable {
         address(proxyAdmin),
         abi.encodeWithSelector(
           lockingImpl.__Locking_init.selector,
-          address(mentoToken), /// @param _token The token to be locked in exchange for voting power in form of veTokens.
+          address(astonicToken), /// @param _token The token to be locked in exchange for voting power in form of veTokens.
           startingPointWeek, ///   @param _startingPointWeek The locking epoch start in weeks. We start the locking contract from week 1 with min slope duration of 1
           0, ///                   @param _minCliffPeriod minimum cliff period in weeks.
           1 ///                    @param _minSlopePeriod minimum slope period in weeks.
@@ -275,7 +267,7 @@ contract GovernanceFactory is Ownable {
     // ====================================================
     address[] memory governanceProposers = new address[](1);
     address[] memory governanceExecutors = new address[](1);
-    governanceProposers[0] = addr.mentoGovernor; // Only MentoGovernor can propose
+    governanceProposers[0] = addr.astonicGovernor; // Only AstonicGovernor can propose
     governanceExecutors[0] = address(0); // Anyone can execute passed proposals
 
     // slither-disable-next-line reentrancy-benign
@@ -283,7 +275,7 @@ contract GovernanceFactory is Ownable {
         address(timelockControllerImpl),
         address(proxyAdmin),
         abi.encodeWithSelector(
-          timelockControllerImpl.__MentoTimelockController_init.selector,
+          timelockControllerImpl.__AstonicTimelockController_init.selector,
           GOVERNANCE_TIMELOCK_DELAY, /// @param minDelay The minimum delay before a proposal can be executed.
           governanceProposers, ///       @param proposers List of addresses that are allowed to queue AND cancel operations.
           governanceExecutors, ///       @param executors List of addresses that are allowed to execute proposals.
@@ -296,21 +288,21 @@ contract GovernanceFactory is Ownable {
   }
 
   /**
-   * @notice Deploys the MentoGovernor contract.
+   * @notice Deploys the AstonicGovernor contract.
    * @param addr Precalculated addresses for the contracts to be deployed.
    */
-  function deployMentoGovernor(PrecalculatedAddresses memory addr) internal {
+  function deployAstonicGovernor(PrecalculatedAddresses memory addr) internal {
     // ==================================================
-    // ========== Deploy 9-10: Mento Governor ===========
+    // ========== Deploy 9-10: Astonic Governor ===========
     // ==================================================
     // slither-disable-next-line reentrancy-benign
-    MentoGovernor mentoGovernorImpl = MentoGovernorDeployerLib.deploy(); // NONCE:10
-    TransparentUpgradeableProxy mentoGovernorProxy = ProxyDeployerLib.deployProxy( // NONCE: 11
-        address(mentoGovernorImpl),
+    AstonicGovernor astonicGovernorImpl = AstonicGovernorDeployerLib.deploy(); // NONCE:10
+    TransparentUpgradeableProxy astonicGovernorProxy = ProxyDeployerLib.deployProxy( // NONCE: 11
+        address(astonicGovernorImpl),
         address(proxyAdmin),
         abi.encodeWithSelector(
-          mentoGovernorImpl.__MentoGovernor_init.selector,
-          address(locking), ///       @param veToken The escrowed Mento Token used for voting.
+          astonicGovernorImpl.__AstonicGovernor_init.selector,
+          address(locking), ///       @param veToken The escrowed Astonic Token used for voting.
           address(governanceTimelock), ///     @param timelockController The timelock controller used by the governor.
           GOVERNOR_VOTING_DELAY, ///       @param votingDelay_ The delay time in blocks between the proposal creation and the start of voting.
           GOVERNOR_VOTING_PERIOD, ///      @param votingPeriod_ The voting duration in blocks between the vote start and vote end.
@@ -320,8 +312,8 @@ contract GovernanceFactory is Ownable {
       );
 
     // slither-disable-next-line reentrancy-benign
-    mentoGovernor = MentoGovernor(payable(mentoGovernorProxy));
-    assert(address(mentoGovernor) == addr.mentoGovernor);
+    astonicGovernor = AstonicGovernor(payable(astonicGovernorProxy));
+    assert(address(astonicGovernor) == addr.astonicGovernor);
   }
 
   /**
@@ -334,7 +326,7 @@ contract GovernanceFactory is Ownable {
     emission.transferOwnership(address(governanceTimelock));
     locking.transferOwnership(address(governanceTimelock));
     proxyAdmin.transferOwnership(address(governanceTimelock));
-    mentoToken.transferOwnership(address(governanceTimelock));
+    astonicToken.transferOwnership(address(governanceTimelock));
   }
 
   /**
@@ -344,12 +336,12 @@ contract GovernanceFactory is Ownable {
   function getPrecalculatedAddresses() internal view returns (PrecalculatedAddresses memory) {
     return
       PrecalculatedAddresses({
-        mentoToken: addressForNonce(2),
+        astonicToken: addressForNonce(2),
         emission: addressForNonce(4),
         airgrab: addressForNonce(5),
         locking: addressForNonce(7),
         governanceTimelock: addressForNonce(9),
-        mentoGovernor: addressForNonce(11)
+        astonicGovernor: addressForNonce(11)
       });
   }
 

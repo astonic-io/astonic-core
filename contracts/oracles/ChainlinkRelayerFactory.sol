@@ -104,7 +104,7 @@ contract ChainlinkRelayerFactory is IChainlinkRelayerFactory, OwnableUpgradeable
   /**
    * @notice Deploys a new relayer contract.
    * @param rateFeedId The rate feed ID for which the relayer will report.
-   * @param rateFeedDescription Human-readable rate feed, which the relayer will report on, i.e. "CELO/USD".
+   * @param rateFeedDescription Human-readable rate feed, which the relayer will report on, i.e. "PLANQ/USD".
    * @param maxTimestampSpread Max difference in milliseconds between the earliest and
    *        latest timestamp of all aggregators in the price path.
    * @param aggregators Array of ChainlinkAggregator structs defining the price path.
@@ -179,7 +179,7 @@ contract ChainlinkRelayerFactory is IChainlinkRelayerFactory, OwnableUpgradeable
    *         Chainlink aggregator (and/or different bytecode if the factory
    *         has been upgraded since the last deployment of the relayer).
    * @param rateFeedId The rate feed ID for which the relayer will report.
-   * @param rateFeedDescription Human-readable rate feed, which the relayer will report on, i.e. "CELO/USD".
+   * @param rateFeedDescription Human-readable rate feed, which the relayer will report on, i.e. "PLANQ/USD".
    * @param maxTimestampSpread Max difference in milliseconds between the earliest and
    *        latest timestamp of all aggregators in the price path.
    * @param aggregators Array of ChainlinkAggregator structs defining the price path.
@@ -219,13 +219,13 @@ contract ChainlinkRelayerFactory is IChainlinkRelayerFactory, OwnableUpgradeable
 
   /**
    * @notice Returns the salt used for CREATE2 deployment of relayer contracts.
-   * @return salt The `bytes32` constant `keccak256("mento.chainlinkRelayer")`.
+   * @return salt The `bytes32` constant `keccak256("astonic.chainlinkRelayer")`.
    * @dev We're using CREATE2 and all the data we want to use for address
    *      generation is included in the init code and constructor arguments, so a
    *      constant salt is enough.
    */
   function _getSalt() internal pure returns (bytes32 salt) {
-    return keccak256("mento.chainlinkRelayer");
+    return keccak256("astonic.chainlinkRelayer");
   }
 
   /**

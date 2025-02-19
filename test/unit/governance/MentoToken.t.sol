@@ -2,17 +2,17 @@
 pragma solidity 0.8.18;
 // solhint-disable func-name-mixedcase
 
-import { uints, addresses } from "mento-std/Array.sol";
+import { uints, addresses } from "contracts/libraries/Array.sol";
 import { GovernanceTest } from "./GovernanceTest.sol";
-import { MentoToken } from "contracts/governance/MentoToken.sol";
+import { AstonicToken } from "contracts/governance/AstonicToken.sol";
 
-contract MentoTokenTest is GovernanceTest {
+contract AstonicTokenTest is GovernanceTest {
   event Paused(address account);
 
-  MentoToken public mentoToken;
+  AstonicToken public astonicToken;
 
-  address public mentoLabsMultiSig = makeAddr("mentoLabsMultiSig");
-  address public mentoLabsTreasuryTimelock = makeAddr("mentoLabsTreasuryTimelock");
+  address public astonicLabsMultiSig = makeAddr("astonicLabsMultiSig");
+  address public astonicLabsTreasuryTimelock = makeAddr("astonicLabsTreasuryTimelock");
   address public airgrab = makeAddr("airgrab");
   address public governanceTimelock = makeAddr("governanceTimelock");
   address public emission = makeAddr("emission");
@@ -20,36 +20,36 @@ contract MentoTokenTest is GovernanceTest {
 
   uint256[] public allocationAmounts = uints(80, 120, 50, 100);
   address[] public allocationRecipients =
-    addresses(mentoLabsMultiSig, mentoLabsTreasuryTimelock, airgrab, governanceTimelock);
+    addresses(astonicLabsMultiSig, astonicLabsTreasuryTimelock, airgrab, governanceTimelock);
 
   modifier notPaused() {
-    mentoToken.unpause();
+    astonicToken.unpause();
     _;
   }
 
   function setUp() public {
-    mentoToken = new MentoToken(allocationRecipients, allocationAmounts, emission, locking);
+    astonicToken = new AstonicToken(allocationRecipients, allocationAmounts, emission, locking);
   }
 
   function test_constructor_whenEmissionIsZero_shouldRevert() public {
-    vm.expectRevert("MentoToken: emission is zero address");
-    mentoToken = new MentoToken(allocationRecipients, allocationAmounts, address(0), locking);
+    vm.expectRevert("AstonicToken: emission is zero address");
+    astonicToken = new AstonicToken(allocationRecipients, allocationAmounts, address(0), locking);
   }
 
   function test_constructor_whenLockingIsZero_shouldRevert() public {
-    vm.expectRevert("MentoToken: locking is zero address");
-    mentoToken = new MentoToken(allocationRecipients, allocationAmounts, emission, address(0));
+    vm.expectRevert("AstonicToken: locking is zero address");
+    astonicToken = new AstonicToken(allocationRecipients, allocationAmounts, emission, address(0));
   }
 
   function test_constructor_whenAllocationRecipientsAndAmountsLengthMismatch_shouldRevert() public {
-    vm.expectRevert("MentoToken: recipients and amounts length mismatch");
-    mentoToken = new MentoToken(allocationRecipients, uints(80, 120, 50), emission, locking);
+    vm.expectRevert("AstonicToken: recipients and amounts length mismatch");
+    astonicToken = new AstonicToken(allocationRecipients, uints(80, 120, 50), emission, locking);
   }
 
   function test_constructor_whenAllocationRecipientIsZero_shouldRevert() public {
-    vm.expectRevert("MentoToken: allocation recipient is zero address");
-    mentoToken = new MentoToken(
-      addresses(mentoLabsMultiSig, mentoLabsTreasuryTimelock, airgrab, address(0)),
+    vm.expectRevert("AstonicToken: allocation recipient is zero address");
+    astonicToken = new AstonicToken(
+      addresses(astonicLabsMultiSig, astonicLabsTreasuryTimelock, airgrab, address(0)),
       allocationAmounts,
       emission,
       locking
@@ -57,44 +57,44 @@ contract MentoTokenTest is GovernanceTest {
   }
 
   function test_constructor_whenTotalAllocationExceeds1000_shouldRevert() public {
-    vm.expectRevert("MentoToken: total allocation exceeds 100%");
-    mentoToken = new MentoToken(allocationRecipients, uints(80, 120, 50, 1000), emission, locking);
+    vm.expectRevert("AstonicToken: total allocation exceeds 100%");
+    astonicToken = new AstonicToken(allocationRecipients, uints(80, 120, 50, 1000), emission, locking);
   }
 
   function test_constructor_shouldPauseTheContract() public {
     vm.expectEmit(true, true, true, true);
     emit Paused(address(this));
-    mentoToken = new MentoToken(allocationRecipients, uints(80, 120, 50, 100), emission, locking);
+    astonicToken = new AstonicToken(allocationRecipients, uints(80, 120, 50, 100), emission, locking);
 
-    assertEq(mentoToken.paused(), true);
+    assertEq(astonicToken.paused(), true);
   }
 
-  /// @dev Test the state initialization post-construction of the MentoToken contract.
+  /// @dev Test the state initialization post-construction of the AstonicToken contract.
   function test_constructor_shouldSetCorrectState() public view {
-    assertEq(mentoToken.emission(), emission);
-    assertEq(mentoToken.emissionSupply(), EMISSION_SUPPLY);
-    assertEq(mentoToken.emittedAmount(), 0);
+    assertEq(astonicToken.emission(), emission);
+    assertEq(astonicToken.emissionSupply(), EMISSION_SUPPLY);
+    assertEq(astonicToken.emittedAmount(), 0);
   }
 
   /// @dev Test the correct token amounts are minted to respective contracts during initialization.
   function test_constructor_shouldMintCorrectAmounts() public view {
-    uint256 mentoLabsMultiSigSupply = mentoToken.balanceOf(mentoLabsMultiSig);
-    uint256 mentoLabsTreasurySupply = mentoToken.balanceOf(mentoLabsTreasuryTimelock);
-    uint256 airgrabSupply = mentoToken.balanceOf(airgrab);
-    uint256 governanceTimelockSupply = mentoToken.balanceOf(governanceTimelock);
-    uint256 emissionSupply = mentoToken.balanceOf(emission);
+    uint256 astonicLabsMultiSigSupply = astonicToken.balanceOf(astonicLabsMultiSig);
+    uint256 astonicLabsTreasurySupply = astonicToken.balanceOf(astonicLabsTreasuryTimelock);
+    uint256 airgrabSupply = astonicToken.balanceOf(airgrab);
+    uint256 governanceTimelockSupply = astonicToken.balanceOf(governanceTimelock);
+    uint256 emissionSupply = astonicToken.balanceOf(emission);
 
-    assertEq(mentoLabsMultiSigSupply, 80_000_000 * 1e18);
-    assertEq(mentoLabsTreasurySupply, 120_000_000 * 1e18);
+    assertEq(astonicLabsMultiSigSupply, 80_000_000 * 1e18);
+    assertEq(astonicLabsTreasurySupply, 120_000_000 * 1e18);
     assertEq(airgrabSupply, 50_000_000 * 1e18);
     assertEq(governanceTimelockSupply, 100_000_000 * 1e18);
     assertEq(emissionSupply, 0);
 
     assertEq(
-      mentoLabsMultiSigSupply + mentoLabsTreasurySupply + airgrabSupply + governanceTimelockSupply + emissionSupply,
+      astonicLabsMultiSigSupply + astonicLabsTreasurySupply + airgrabSupply + governanceTimelockSupply + emissionSupply,
       INITIAL_TOTAL_SUPPLY
     );
-    assertEq(mentoToken.totalSupply(), INITIAL_TOTAL_SUPPLY);
+    assertEq(astonicToken.totalSupply(), INITIAL_TOTAL_SUPPLY);
   }
 
   /**
@@ -105,15 +105,15 @@ contract MentoTokenTest is GovernanceTest {
   function test_burn_shouldBurnTokens() public notPaused {
     uint256 initialBalance = 3e18;
     uint256 burnAmount = 1e18;
-    deal(address(mentoToken), alice, initialBalance);
+    deal(address(astonicToken), alice, initialBalance);
 
     vm.startPrank(alice);
     vm.expectRevert("ERC20: burn amount exceeds balance");
-    mentoToken.burn(initialBalance + 1);
+    astonicToken.burn(initialBalance + 1);
 
-    mentoToken.burn(burnAmount);
-    assertEq(mentoToken.balanceOf(alice), initialBalance - burnAmount);
-    assertEq(mentoToken.totalSupply(), INITIAL_TOTAL_SUPPLY - burnAmount);
+    astonicToken.burn(burnAmount);
+    assertEq(astonicToken.balanceOf(alice), initialBalance - burnAmount);
+    assertEq(astonicToken.totalSupply(), INITIAL_TOTAL_SUPPLY - burnAmount);
   }
 
   /**
@@ -124,25 +124,25 @@ contract MentoTokenTest is GovernanceTest {
   function test_burnFrom_whenAllowed_shouldBurnTokens() public notPaused {
     uint256 initialBalance = 3e18;
     uint256 burnAmount = 1e18;
-    deal(address(mentoToken), alice, initialBalance);
+    deal(address(astonicToken), alice, initialBalance);
 
     vm.prank(bob);
     vm.expectRevert("ERC20: insufficient allowance");
-    mentoToken.burnFrom(alice, burnAmount);
+    astonicToken.burnFrom(alice, burnAmount);
 
     vm.prank(alice);
-    mentoToken.approve(bob, burnAmount);
+    astonicToken.approve(bob, burnAmount);
 
     vm.startPrank(bob);
     vm.expectRevert("ERC20: insufficient allowance");
-    mentoToken.burnFrom(alice, burnAmount + 1);
+    astonicToken.burnFrom(alice, burnAmount + 1);
 
-    mentoToken.burnFrom(alice, burnAmount);
-    assertEq(mentoToken.balanceOf(alice), initialBalance - burnAmount);
-    assertEq(mentoToken.totalSupply(), INITIAL_TOTAL_SUPPLY - burnAmount);
+    astonicToken.burnFrom(alice, burnAmount);
+    assertEq(astonicToken.balanceOf(alice), initialBalance - burnAmount);
+    assertEq(astonicToken.totalSupply(), INITIAL_TOTAL_SUPPLY - burnAmount);
 
     vm.expectRevert("ERC20: insufficient allowance");
-    mentoToken.burnFrom(alice, burnAmount);
+    astonicToken.burnFrom(alice, burnAmount);
   }
 
   /**
@@ -153,8 +153,8 @@ contract MentoTokenTest is GovernanceTest {
   function test_mint_whenNotEmissionContract_shouldRevert() public {
     uint256 mintAmount = 10e18;
     vm.prank(bob);
-    vm.expectRevert("MentoToken: only emission contract");
-    mentoToken.mint(alice, mintAmount);
+    vm.expectRevert("AstonicToken: only emission contract");
+    astonicToken.mint(alice, mintAmount);
   }
 
   /**
@@ -167,13 +167,13 @@ contract MentoTokenTest is GovernanceTest {
 
     vm.startPrank(emission);
 
-    vm.expectRevert("MentoToken: emission supply exceeded");
-    mentoToken.mint(alice, EMISSION_SUPPLY + 1);
+    vm.expectRevert("AstonicToken: emission supply exceeded");
+    astonicToken.mint(alice, EMISSION_SUPPLY + 1);
 
-    mentoToken.mint(alice, mintAmount);
+    astonicToken.mint(alice, mintAmount);
 
-    vm.expectRevert("MentoToken: emission supply exceeded");
-    mentoToken.mint(alice, EMISSION_SUPPLY - mintAmount + 1);
+    vm.expectRevert("AstonicToken: emission supply exceeded");
+    astonicToken.mint(alice, EMISSION_SUPPLY - mintAmount + 1);
   }
 
   /**
@@ -187,114 +187,114 @@ contract MentoTokenTest is GovernanceTest {
     uint256 mintAmount = 10e18;
 
     vm.startPrank(emission);
-    mentoToken.mint(alice, mintAmount);
+    astonicToken.mint(alice, mintAmount);
 
-    assertEq(mentoToken.balanceOf(alice), mintAmount);
-    assertEq(mentoToken.emittedAmount(), mintAmount);
+    assertEq(astonicToken.balanceOf(alice), mintAmount);
+    assertEq(astonicToken.emittedAmount(), mintAmount);
 
-    mentoToken.mint(bob, mintAmount);
+    astonicToken.mint(bob, mintAmount);
 
-    assertEq(mentoToken.balanceOf(bob), mintAmount);
-    assertEq(mentoToken.emittedAmount(), 2 * mintAmount);
+    assertEq(astonicToken.balanceOf(bob), mintAmount);
+    assertEq(astonicToken.emittedAmount(), 2 * mintAmount);
 
-    mentoToken.mint(alice, EMISSION_SUPPLY - 2 * mintAmount);
-    assertEq(mentoToken.emittedAmount(), EMISSION_SUPPLY);
+    astonicToken.mint(alice, EMISSION_SUPPLY - 2 * mintAmount);
+    assertEq(astonicToken.emittedAmount(), EMISSION_SUPPLY);
   }
 
   function test_transfer_whenPaused_shouldRevert() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), alice, amount);
+    deal(address(astonicToken), alice, amount);
 
     vm.startPrank(alice);
-    vm.expectRevert("MentoToken: token transfer while paused");
-    mentoToken.transfer(bob, amount);
+    vm.expectRevert("AstonicToken: token transfer while paused");
+    astonicToken.transfer(bob, amount);
   }
 
   function test_transferFrom_whenPaused_shouldRevert() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), alice, amount);
+    deal(address(astonicToken), alice, amount);
     vm.prank(alice);
-    mentoToken.approve(bob, amount);
+    astonicToken.approve(bob, amount);
 
     vm.startPrank(bob);
-    vm.expectRevert("MentoToken: token transfer while paused");
-    mentoToken.transferFrom(alice, bob, amount);
+    vm.expectRevert("AstonicToken: token transfer while paused");
+    astonicToken.transferFrom(alice, bob, amount);
   }
 
   function test_transfer_whenPaused_calledByOwner_shouldWork() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), address(this), amount);
-    mentoToken.transfer(bob, amount);
-    assertEq(mentoToken.balanceOf(bob), amount);
+    deal(address(astonicToken), address(this), amount);
+    astonicToken.transfer(bob, amount);
+    assertEq(astonicToken.balanceOf(bob), amount);
   }
 
   function test_transferFrom_whenPaused_calledByOwner_shouldWork() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), alice, amount);
+    deal(address(astonicToken), alice, amount);
     vm.prank(alice);
-    mentoToken.approve(address(this), amount);
+    astonicToken.approve(address(this), amount);
 
-    mentoToken.transferFrom(alice, bob, amount);
-    assertEq(mentoToken.balanceOf(bob), amount);
+    astonicToken.transferFrom(alice, bob, amount);
+    assertEq(astonicToken.balanceOf(bob), amount);
   }
 
   function test_transfer_whenPaused_calledByLocking_shouldWork() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), locking, amount);
+    deal(address(astonicToken), locking, amount);
     vm.prank(locking);
-    mentoToken.transfer(bob, amount);
-    assertEq(mentoToken.balanceOf(bob), amount);
+    astonicToken.transfer(bob, amount);
+    assertEq(astonicToken.balanceOf(bob), amount);
   }
 
   function test_transferFrom_whenPaused_calledByLocking_shouldWork() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), alice, amount);
+    deal(address(astonicToken), alice, amount);
     vm.prank(alice);
-    mentoToken.approve(locking, amount);
+    astonicToken.approve(locking, amount);
 
     vm.prank(locking);
-    mentoToken.transferFrom(alice, bob, amount);
-    assertEq(mentoToken.balanceOf(bob), amount);
+    astonicToken.transferFrom(alice, bob, amount);
+    assertEq(astonicToken.balanceOf(bob), amount);
   }
 
   function test_transfer_whenPaused_calledByEmission_shouldWork() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), emission, amount);
+    deal(address(astonicToken), emission, amount);
     vm.prank(emission);
-    mentoToken.transfer(bob, amount);
-    assertEq(mentoToken.balanceOf(bob), amount);
+    astonicToken.transfer(bob, amount);
+    assertEq(astonicToken.balanceOf(bob), amount);
   }
 
   function test_transferFrom_whenPaused_calledByEmission_shouldWork() public {
     uint256 amount = 10e18;
-    deal(address(mentoToken), alice, amount);
+    deal(address(astonicToken), alice, amount);
     vm.prank(alice);
-    mentoToken.approve(emission, amount);
+    astonicToken.approve(emission, amount);
 
     vm.prank(emission);
-    mentoToken.transferFrom(alice, bob, amount);
-    assertEq(mentoToken.balanceOf(bob), amount);
+    astonicToken.transferFrom(alice, bob, amount);
+    assertEq(astonicToken.balanceOf(bob), amount);
   }
 
   function test_mint_whenPaused_calledByEmission_shouldWork() public {
     vm.prank(emission);
-    mentoToken.mint(emission, 10e18);
-    assertEq(mentoToken.balanceOf(emission), 10e18);
+    astonicToken.mint(emission, 10e18);
+    assertEq(astonicToken.balanceOf(emission), 10e18);
   }
 
   function test_unpause_whenPaused_calledByOwner_shouldUnpause() public {
-    mentoToken.unpause();
-    assertEq(mentoToken.paused(), false);
+    astonicToken.unpause();
+    assertEq(astonicToken.paused(), false);
   }
 
   function test_unpause_whenNotPaused_shouldRevert() public notPaused {
-    vm.expectRevert("MentoToken: token is not paused");
-    mentoToken.unpause();
+    vm.expectRevert("AstonicToken: token is not paused");
+    astonicToken.unpause();
   }
 
   function test_unpause_whenNotCalledByOwner_shouldRevert() public {
     vm.prank(bob);
     vm.expectRevert("Ownable: caller is not the owner");
-    mentoToken.unpause();
+    astonicToken.unpause();
   }
 }

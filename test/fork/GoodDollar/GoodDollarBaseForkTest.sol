@@ -3,7 +3,7 @@ pragma solidity ^0.8;
 
 // Libraries / Helpers / Utils
 import { console } from "forge-std/console.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { TokenHelpers } from "../helpers/TokenHelpers.sol";
 import { L0, L1, LG, min } from "../helpers/misc.sol";
 
@@ -105,8 +105,8 @@ contract GoodDollarBaseForkTest is BaseForkTest {
     goodDollarReserve.initialize({
       registryAddress: REGISTRY_ADDRESS,
       _tobinTaxStalenessThreshold: 600, // deprecated
-      _spendingRatioForCelo: 1000000000000000000000000,
-      _frozenGold: 0,
+      _spendingRatioForPlanq: 1000000000000000000000000,
+      _frozenPlanq: 0,
       _frozenDays: 0,
       _assetAllocationSymbols: initialAssetAllocationSymbols,
       _assetAllocationWeights: initialAssetAllocationWeights,

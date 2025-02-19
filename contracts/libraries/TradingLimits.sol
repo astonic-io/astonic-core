@@ -6,7 +6,7 @@ import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
 
 /**
  * @title TradingLimits
- * @author Mento Team
+ * @author Astonic Team
  * @notice This library provides data structs and utility functions for
  * defining and verifying trading limits on the netflow of an asset.
  * There are three limits that can be enabled:

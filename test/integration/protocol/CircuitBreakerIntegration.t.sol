@@ -4,7 +4,7 @@ pragma solidity ^0.8;
 
 import { ProtocolTest } from "./ProtocolTest.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 import { IERC20 } from "contracts/interfaces/IERC20.sol";
 import { IBreakerBox } from "contracts/interfaces/IBreakerBox.sol";
@@ -21,7 +21,7 @@ contract CircuitBreakerIntegration is ProtocolTest {
 
     deal(address(cUSDToken), trader, 10 ** 22, true); // Mint 10k to trader
     deal(address(cEURToken), trader, 10 ** 22, true); // Mint 10k to trader
-    deal(address(celoToken), address(reserve), 1e24); // Gift 1Mil Celo to reserve
+    deal(address(planqToken), address(reserve), 1e24); // Gift 1Mil Astonic to reserve
     deal(address(usdcToken), address(reserve), 1e24); // Gift 1Mil USDC to reserve
   }
 
@@ -45,51 +45,51 @@ contract CircuitBreakerIntegration is ProtocolTest {
   }
 
   function test_medianDeltaBreaker__whenMedianExceedsThresholdAndRecovers_shouldHaltAndRecover() public {
-    // Trip median delta breaker for cUSD_CELO_referenceRateFeedID threshold: 15%
-    setMedianRate(cUSD_CELO_referenceRateFeedID, 5e23 * 1.151);
+    // Trip median delta breaker for cUSD_PLANQ_referenceRateFeedID threshold: 15%
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, 5e23 * 1.151);
 
     // Try swap with shouldBreak true
-    doSwapIn(pair_cUSD_CELO_ID, address(cUSDToken), address(celoToken), true);
+    doSwapIn(pair_cUSD_PLQ_ID, address(cUSDToken), address(planqToken), true);
 
     // Check trading mode
-    uint8 tradingMode = breakerBox.getRateFeedTradingMode(cUSD_CELO_referenceRateFeedID);
+    uint8 tradingMode = breakerBox.getRateFeedTradingMode(cUSD_PLANQ_referenceRateFeedID);
     assertEq(uint256(tradingMode), 3); // 3 = trading halted
 
     // Cool down breaker and set new median that doesnt exceed threshold
     vm.warp(block.timestamp + 5 minutes);
-    setMedianRate(cUSD_CELO_referenceRateFeedID, 5e23);
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, 5e23);
 
     // Check trading mode
-    tradingMode = breakerBox.getRateFeedTradingMode(cUSD_CELO_referenceRateFeedID);
+    tradingMode = breakerBox.getRateFeedTradingMode(cUSD_PLANQ_referenceRateFeedID);
     assertEq(uint256(tradingMode), 0); // 0 = bidirectional trading
 
     // Try swap with shouldBreak false -> trading is bidirectional again
-    doSwapIn(pair_cUSD_CELO_ID, address(cUSDToken), address(celoToken), false);
+    doSwapIn(pair_cUSD_PLQ_ID, address(cUSDToken), address(planqToken), false);
   }
 
   function test_medianDeltaBreaker__whenMedianSubceedsThresholdAndRecovers_shouldHaltAndRecover() public {
     uint256 newMedian = 5e23 - 5e23 * 0.151;
-    // Trip median delta breaker for cUSD_CELO_referenceRateFeedID threshold: 15%
-    setMedianRate(cUSD_CELO_referenceRateFeedID, newMedian);
+    // Trip median delta breaker for cUSD_PLANQ_referenceRateFeedID threshold: 15%
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, newMedian);
 
     // Try swap with shouldBreak true
-    doSwapIn(pair_cUSD_CELO_ID, address(cUSDToken), address(celoToken), true);
+    doSwapIn(pair_cUSD_PLQ_ID, address(cUSDToken), address(planqToken), true);
 
     // Check trading mode
-    uint8 tradingMode = breakerBox.getRateFeedTradingMode(cUSD_CELO_referenceRateFeedID);
+    uint8 tradingMode = breakerBox.getRateFeedTradingMode(cUSD_PLANQ_referenceRateFeedID);
     assertEq(uint256(tradingMode), 3); // 3 = trading halted
 
     // Cool down breaker and set new median that doesnt exceed threshold
     vm.warp(block.timestamp + 5 minutes);
     newMedian = newMedian + (5e23 - 5e23 * 0.151) * 0.14;
-    setMedianRate(cUSD_CELO_referenceRateFeedID, newMedian);
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, newMedian);
 
     // Check trading mode
-    tradingMode = breakerBox.getRateFeedTradingMode(cUSD_CELO_referenceRateFeedID);
+    tradingMode = breakerBox.getRateFeedTradingMode(cUSD_PLANQ_referenceRateFeedID);
     assertEq(uint256(tradingMode), 0); // 0 = bidirectional trading
 
     // Try swap with shouldBreak false -> trading is bidirectional again
-    doSwapIn(pair_cUSD_CELO_ID, address(cUSDToken), address(celoToken), false);
+    doSwapIn(pair_cUSD_PLQ_ID, address(cUSDToken), address(planqToken), false);
   }
 
   function test_valueDeltaBreaker_whenMedianExceedsThresholdAndRecovers_shouldHaltAndRecover() public {
@@ -181,26 +181,26 @@ contract CircuitBreakerIntegration is ProtocolTest {
   }
 
   function test_medianDeltaBreaker_whenCooledDownButMedianStillExceeds_shouldNotRecover() public {
-    // Trip median delta breaker for cUSD_CELO_referenceRateFeedID threshold: 15%
-    setMedianRate(cUSD_CELO_referenceRateFeedID, 5e23 * 1.151);
+    // Trip median delta breaker for cUSD_PLANQ_referenceRateFeedID threshold: 15%
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, 5e23 * 1.151);
 
     // Try swap with shouldBreak true
-    doSwapIn(pair_cUSD_CELO_ID, address(cUSDToken), address(celoToken), true);
+    doSwapIn(pair_cUSD_PLQ_ID, address(cUSDToken), address(planqToken), true);
 
     // Check trading mode
-    uint8 tradingMode = breakerBox.getRateFeedTradingMode(cUSD_CELO_referenceRateFeedID);
+    uint8 tradingMode = breakerBox.getRateFeedTradingMode(cUSD_PLANQ_referenceRateFeedID);
     assertEq(uint256(tradingMode), 3); // 3 = trading halted
 
     // Cool down breaker
     vm.warp(block.timestamp + 5 minutes);
-    setMedianRate(cUSD_CELO_referenceRateFeedID, 5e23 * 0.95);
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, 5e23 * 0.95);
 
     // Check trading mode
-    tradingMode = breakerBox.getRateFeedTradingMode(cUSD_CELO_referenceRateFeedID);
+    tradingMode = breakerBox.getRateFeedTradingMode(cUSD_PLANQ_referenceRateFeedID);
     assertEq(uint256(tradingMode), 3); // 3 = bidirectional trading
 
     // Try swap with shouldBreak true -> median still exceeds threshold
-    doSwapIn(pair_cUSD_CELO_ID, address(cUSDToken), address(celoToken), true);
+    doSwapIn(pair_cUSD_PLQ_ID, address(cUSDToken), address(planqToken), true);
   }
 
   function test_valueDeltaBreaker_whenCooledDownButMedianStillExceeds_shouldNotRecover() public {
@@ -270,25 +270,25 @@ contract CircuitBreakerIntegration is ProtocolTest {
   }
 
   function test_medianDeltaBreaker_whenCooldownTimeIsZero_shouldNeverRecover() public {
-    // Trip median delta breaker for cEUR_CELO_referenceRateFeedID  threshold: 0.14 * 1e24
-    setMedianRate(cEUR_CELO_referenceRateFeedID, 1e24 + 1e24 * 0.141);
+    // Trip median delta breaker for cEUR_PLANQ_referenceRateFeedID  threshold: 0.14 * 1e24
+    setMedianRate(cEUR_PLANQ_referenceRateFeedID, 1e24 + 1e24 * 0.141);
 
     // Try swap with shouldBreak true
-    doSwapIn(pair_cEUR_CELO_ID, address(cEURToken), address(celoToken), true);
+    doSwapIn(pair_cEUR_PLQ_ID, address(cEURToken), address(planqToken), true);
 
     // Check trading modes
-    uint8 rateFeedTradingMode = breakerBox.getRateFeedTradingMode(cEUR_CELO_referenceRateFeedID);
+    uint8 rateFeedTradingMode = breakerBox.getRateFeedTradingMode(cEUR_PLANQ_referenceRateFeedID);
     assertEq(uint256(rateFeedTradingMode), 3); // 3 = trading halted
 
     // Cool down breaker
     vm.warp(block.timestamp + 5 seconds);
-    setMedianRate(cEUR_CELO_referenceRateFeedID, 1e24 + 1e24 * 0.1);
+    setMedianRate(cEUR_PLANQ_referenceRateFeedID, 1e24 + 1e24 * 0.1);
 
     // Try swap with shouldBreak true
-    doSwapIn(pair_cEUR_CELO_ID, address(cEURToken), address(celoToken), true);
+    doSwapIn(pair_cEUR_PLQ_ID, address(cEURToken), address(planqToken), true);
 
     // Check trading modes
-    rateFeedTradingMode = breakerBox.getRateFeedTradingMode(cEUR_CELO_referenceRateFeedID);
+    rateFeedTradingMode = breakerBox.getRateFeedTradingMode(cEUR_PLANQ_referenceRateFeedID);
     assertEq(uint256(rateFeedTradingMode), 3); // 3 = trading halted
   }
 

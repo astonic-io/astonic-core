@@ -41,7 +41,7 @@ contract BreakerBox is IBreakerBox, Ownable {
   // List of breakers to be checked.
   address[] public breakers;
 
-  // Address of the Mento SortedOracles contract
+  // Address of the Astonic SortedOracles contract
   ISortedOracles public sortedOracles;
 
   modifier onlyValidBreaker(address breaker, uint64 tradingMode) {
@@ -54,7 +54,7 @@ contract BreakerBox is IBreakerBox, Ownable {
 
   /**
    * @param _rateFeedIDs rateFeedIDs to be added.
-   * @param _sortedOracles The address of the Celo sorted oracles contract.
+   * @param _sortedOracles The address of the Planq sorted oracles contract.
    */
   constructor(address[] memory _rateFeedIDs, ISortedOracles _sortedOracles) public {
     _transferOwnership(msg.sender);
@@ -313,7 +313,7 @@ contract BreakerBox is IBreakerBox, Ownable {
   /* ==================== Check Breakers ==================== */
 
   /**
-   * @notice Checks breakers for the rateFeedID with the specified id 
+   * @notice Checks breakers for the rateFeedID with the specified id
              and sets correct trading mode if any breakers are tripped
              or need to be reset.
    * @param rateFeedID The address of the rateFeed to run checks for.
@@ -325,9 +325,9 @@ contract BreakerBox is IBreakerBox, Ownable {
   }
 
   /**
-   * @notice Checks breakers for the rateFeedID with the specified id 
+   * @notice Checks breakers for the rateFeedID with the specified id
              and sets correct trading mode if any breakers are tripped
-             or need to be reset. 
+             or need to be reset.
    * @param rateFeedID The address of the rateFeed to run checks for.
    */
   function _checkAndSetBreakers(address rateFeedID) internal {

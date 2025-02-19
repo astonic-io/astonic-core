@@ -3,14 +3,14 @@
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 import { stdStorage, StdStorage } from "forge-std/Test.sol";
 
 import { WithRegistry } from "test/utils/WithRegistry.sol";
 import { MockSortedOracles } from "test/utils/mocks/MockSortedOracles.sol";
 import { TestERC20 } from "test/utils/mocks/TestERC20.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { IReserve } from "contracts/interfaces/IReserve.sol";
 
 contract ReserveTest is Test, WithRegistry {
@@ -25,7 +25,7 @@ contract ReserveTest is Test, WithRegistry {
   event OtherReserveAddressAdded(address indexed otherReserveAddress);
   event OtherReserveAddressRemoved(address indexed otherReserveAddress, uint256 index);
   event AssetAllocationSet(bytes32[] symbols, uint256[] weights);
-  event ReserveGoldTransferred(address indexed spender, address indexed to, uint256 value);
+  event ReservePlanqTransferred(address indexed spender, address indexed to, uint256 value);
   event TobinTaxSet(uint256 value);
   event TobinTaxReserveRatioSet(uint256 value);
   event ExchangeSpenderAdded(address indexed exchangeSpender);
@@ -337,7 +337,7 @@ contract ReserveTest_initAndSetters is ReserveTest {
     deal(otherReserveAddresses[0], 100000);
     deal(otherReserveAddresses[1], 100000);
     deal(address(reserve), 100000);
-    assertEq(reserve.getReserveGoldBalance(), uint256(300000));
+    assertEq(reserve.getReservePlanqBalance(), uint256(300000));
   }
 
   function test_removeOtherReserveAddress() public {
@@ -402,7 +402,7 @@ contract ReserveTest_initAndSetters is ReserveTest {
 contract ReserveTest_transfers is ReserveTest {
   using FixidityLib for FixidityLib.Fraction;
 
-  uint256 constant reserveCeloBalance = 100000;
+  uint256 constant reservePlanqBalance = 100000;
   uint256 constant reserveDummyToken1Balance = 10000000;
   uint256 constant reserveDummyToken2Balance = 20000000;
   address payable otherReserveAddress = payable(makeAddr("otherReserveAddress"));
@@ -418,7 +418,7 @@ contract ReserveTest_transfers is ReserveTest {
     collateralAssets[0] = address(dummyToken1);
     collateralAssetDailySpendingRatios[0] = FixidityLib.newFixedFraction(2, 10).unwrap();
 
-    deal(address(reserve), reserveCeloBalance);
+    deal(address(reserve), reservePlanqBalance);
     deal(address(dummyToken1), address(reserve), reserveDummyToken1Balance);
     deal(address(dummyToken2), address(reserve), reserveDummyToken2Balance);
     reserve.addOtherReserveAddress(otherReserveAddress);
@@ -428,35 +428,35 @@ contract ReserveTest_transfers is ReserveTest {
     vm.warp(100 * 24 * 3600 + 445);
   }
 
-  /* ---------- Transfer Gold ---------- */
+  /* ---------- Transfer Planq ---------- */
 
-  function test_transferGold() public {
-    uint256 amount = reserveCeloBalance / 10;
+  function test_transferPlanq() public {
+    uint256 amount = reservePlanqBalance / 10;
 
     vm.prank(spender);
-    reserve.transferGold(otherReserveAddress, amount);
+    reserve.transferPlanq(otherReserveAddress, amount);
     assertEq(otherReserveAddress.balance, amount);
-    assertEq(address(reserve).balance, reserveCeloBalance - amount);
+    assertEq(address(reserve).balance, reservePlanqBalance - amount);
 
     vm.expectRevert("Exceeding spending limit");
     vm.prank(spender);
-    reserve.transferGold(otherReserveAddress, amount * 2);
+    reserve.transferPlanq(otherReserveAddress, amount * 2);
 
     vm.warp(block.timestamp + 24 * 3600);
     vm.prank(spender);
-    reserve.transferGold(otherReserveAddress, amount * 2);
+    reserve.transferPlanq(otherReserveAddress, amount * 2);
     assertEq(otherReserveAddress.balance, 3 * amount);
 
     vm.expectRevert("can only transfer to other reserve address");
     vm.prank(spender);
-    reserve.transferGold(notOtherReserveAddress, amount);
+    reserve.transferPlanq(notOtherReserveAddress, amount);
 
     reserve.removeSpender(spender);
 
     vm.warp(block.timestamp + 24 * 3600);
     vm.expectRevert("sender not allowed to transfer Reserve funds");
     vm.prank(spender);
-    reserve.transferGold(otherReserveAddress, amount);
+    reserve.transferPlanq(otherReserveAddress, amount);
   }
 
   /* ---------- Transfer Collateral Asset ---------- */
@@ -660,47 +660,47 @@ contract ReserveTest_transfers is ReserveTest {
     reserve.removeSpender(notDeployer);
   }
 
-  function test_transferExchangeGold_asExchangeFromRegistry() public {
-    transferExchangeGoldSpecs(exchangeAddress);
+  function test_transferExchangePlanq_asExchangeFromRegistry() public {
+    transferExchangePlanqSpecs(exchangeAddress);
   }
 
-  function test_transferExchangeGold_asRegisteredExchange() public {
+  function test_transferExchangePlanq_asRegisteredExchange() public {
     address additionalExchange = address(0x6666);
     reserve.addExchangeSpender(additionalExchange);
-    transferExchangeGoldSpecs(exchangeAddress);
+    transferExchangePlanqSpecs(exchangeAddress);
 
     reserve.removeExchangeSpender(additionalExchange, 0);
 
     vm.prank(additionalExchange);
     vm.expectRevert("Address not allowed to spend");
-    reserve.transferExchangeGold(otherReserveAddress, 1000);
+    reserve.transferExchangePlanq(otherReserveAddress, 1000);
   }
 
-  function transferExchangeGoldSpecs(address caller) public {
+  function transferExchangePlanqSpecs(address caller) public {
     vm.prank(caller);
     address payable dest = payable(makeAddr("dest"));
-    reserve.transferExchangeGold(dest, 1000);
+    reserve.transferExchangePlanq(dest, 1000);
     assertEq(dest.balance, 1000);
 
     vm.prank(spender);
     vm.expectRevert("Address not allowed to spend");
-    reserve.transferExchangeGold(dest, 1000);
+    reserve.transferExchangePlanq(dest, 1000);
 
     vm.prank(notDeployer);
     vm.expectRevert("Address not allowed to spend");
-    reserve.transferExchangeGold(dest, 1000);
+    reserve.transferExchangePlanq(dest, 1000);
   }
 
-  function test_frozenGold() public {
+  function test_frozenPlanq() public {
     reserve.setDailySpendingRatio(FixidityLib.fixed1().unwrap());
     vm.expectRevert("Cannot freeze more than balance");
-    reserve.setFrozenGold(reserveCeloBalance + 1, 1);
-    uint256 dailyUnlock = reserveCeloBalance / 3;
+    reserve.setFrozenPlanq(reservePlanqBalance + 1, 1);
+    uint256 dailyUnlock = reservePlanqBalance / 3;
 
-    reserve.setFrozenGold(reserveCeloBalance, 3);
+    reserve.setFrozenPlanq(reservePlanqBalance, 3);
     vm.startPrank(spender);
     vm.expectRevert("Exceeding spending limit");
-    reserve.transferGold(otherReserveAddress, 1);
+    reserve.transferPlanq(otherReserveAddress, 1);
 
     uint256 day1 = block.timestamp + 3600 * 24;
     uint256 day2 = day1 + 3600 * 24;
@@ -708,15 +708,15 @@ contract ReserveTest_transfers is ReserveTest {
 
     vm.warp(day1);
     assertEq(reserve.getUnfrozenBalance(), dailyUnlock);
-    reserve.transferGold(otherReserveAddress, dailyUnlock);
+    reserve.transferPlanq(otherReserveAddress, dailyUnlock);
 
     vm.warp(day2);
     assertEq(reserve.getUnfrozenBalance(), dailyUnlock);
-    reserve.transferGold(otherReserveAddress, dailyUnlock);
+    reserve.transferPlanq(otherReserveAddress, dailyUnlock);
 
     vm.warp(day3);
     assertEq(reserve.getUnfrozenBalance(), dailyUnlock + 1);
-    reserve.transferGold(otherReserveAddress, dailyUnlock);
+    reserve.transferPlanq(otherReserveAddress, dailyUnlock);
     vm.stopPrank();
   }
 }

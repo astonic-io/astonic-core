@@ -4,12 +4,12 @@ pragma solidity 0.8.18;
 
 import { GovernanceTest } from "./GovernanceTest.sol";
 import { Emission } from "contracts/governance/Emission.sol";
-import { MockMentoToken } from "test/utils/mocks/MockMentoToken.sol";
+import { MockAstonicToken } from "test/utils/mocks/MockAstonicToken.sol";
 
 contract EmissionTest is GovernanceTest {
   Emission public emission;
 
-  MockMentoToken public mentoToken;
+  MockAstonicToken public astonicToken;
   address public emissionTarget;
 
   uint256 public constant NEGLIGIBLE_AMOUNT = 2e18;
@@ -19,12 +19,12 @@ contract EmissionTest is GovernanceTest {
   event TokensEmitted(address indexed target, uint256 amount);
 
   function setUp() public {
-    mentoToken = new MockMentoToken();
+    astonicToken = new MockAstonicToken();
     emissionTarget = makeAddr("EmissionTarget");
 
     emission = new Emission(false);
     vm.prank(owner);
-    emission.initialize(address(mentoToken), emissionTarget, EMISSION_SUPPLY);
+    emission.initialize(address(astonicToken), emissionTarget, EMISSION_SUPPLY);
   }
 
   function test_initialize_shouldSetOwner() public view {
@@ -36,7 +36,7 @@ contract EmissionTest is GovernanceTest {
   }
 
   function test_initialize_shouldSetEmissionToken() public view {
-    assertEq(address(emission.mentoToken()), address(mentoToken));
+    assertEq(address(emission.astonicToken()), address(astonicToken));
   }
 
   function test_initialize_shouldSetEmissionTarget() public view {
@@ -82,7 +82,7 @@ contract EmissionTest is GovernanceTest {
     uint256 amount = emission.emitTokens();
 
     assertApproxEqAbs(amount, calculatedAmountFor1Month, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter6Months_shouldMintCorrectAmountToTarget() public {
@@ -92,7 +92,7 @@ contract EmissionTest is GovernanceTest {
     uint256 amount = emission.emitTokens();
 
     assertApproxEqAbs(amount, calculatedAmountFor6Months, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter1Year_shouldMintCorrectAmountToTarget() public {
@@ -102,7 +102,7 @@ contract EmissionTest is GovernanceTest {
     uint256 amount = emission.emitTokens();
 
     assertApproxEqAbs(amount, calculatedAmountFor1Year, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter10Years_shouldMintCorrectAmountToTarget() public {
@@ -112,7 +112,7 @@ contract EmissionTest is GovernanceTest {
     uint256 amount = emission.emitTokens();
 
     assertApproxEqAbs(amount, calculatedAmountFor10Years, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter15Years_shouldMintCorrectAmountToTarget() public {
@@ -122,7 +122,7 @@ contract EmissionTest is GovernanceTest {
     uint256 amount = emission.emitTokens();
 
     assertApproxEqAbs(amount, calculatedAmountFor15Years, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter25Years_shouldMintCorrectAmountToTarget() public {
@@ -131,7 +131,7 @@ contract EmissionTest is GovernanceTest {
     vm.warp(25 * YEAR);
     uint256 amount = emission.emitTokens();
     assertApproxEqAbs(amount, calculatedAmountFor25Years, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter30Years_shouldMintCorrectAmountToTarget() public {
@@ -140,7 +140,7 @@ contract EmissionTest is GovernanceTest {
     vm.warp(30 * YEAR);
     uint256 amount = emission.emitTokens();
     assertApproxEqAbs(amount, calculatedAmountFor30Years, NEGLIGIBLE_AMOUNT);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenAfter40Years_shouldMintCorrectAmountToTarget() public {
@@ -149,7 +149,7 @@ contract EmissionTest is GovernanceTest {
     vm.warp(40 * YEAR);
     uint256 amount = emission.emitTokens();
     assertEq(amount, calculatedAmountFor40Years);
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_fuzz_emitTokens_shouldNotRevert(uint256 duration) public {
@@ -159,7 +159,7 @@ contract EmissionTest is GovernanceTest {
     vm.warp(duration);
     uint256 amount = emission.emitTokens();
 
-    assertEq(mentoToken.balanceOf(emissionTarget), amount);
+    assertEq(astonicToken.balanceOf(emissionTarget), amount);
   }
 
   function test_emitTokens_whenMultipleEmits_shouldTakePreviousMintsIntoAccount() public {
@@ -227,6 +227,6 @@ contract EmissionTest is GovernanceTest {
     uint256 totalEmitted = amount1 + amount2 + amount3;
 
     assertEq(totalEmitted, emission.totalEmittedAmount());
-    assertEq(mentoToken.balanceOf(emissionTarget), totalEmitted);
+    assertEq(astonicToken.balanceOf(emissionTarget), totalEmitted);
   }
 }

@@ -7,8 +7,6 @@ contract LockingHarness is Locking {
   uint32 public blockNumberMocked;
   uint32 public epochShift;
 
-  constructor(bool disableInitializers) Locking(disableInitializers) {}
-
   function incrementBlock(uint32 _amount) external {
     blockNumberMocked = blockNumberMocked + _amount;
   }

@@ -4,7 +4,7 @@
 pragma solidity ^0.8;
 
 import { stdStorage, StdStorage } from "forge-std/Test.sol";
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
 import { MockSortedOracles } from "test/utils/mocks/MockSortedOracles.sol";
 import { IMedianDeltaBreaker } from "contracts/interfaces/IMedianDeltaBreaker.sol";

@@ -7,8 +7,8 @@ pragma solidity ^0.5.17;
  * If we would have this file in the `test` folder, everything builds, but
  * `vm.getCode` will complain that it can't find the artifact.
  */
-import "celo/contracts/common/Registry.sol";
-import "celo/contracts/common/Freezer.sol";
-import "celo/contracts/stability/SortedOracles.sol";
+import "./common/Registry.sol";
+import "./common/Freezer.sol";
+import "./common/SortedOracles.sol";
 import "test/utils/harnesses/WithThresholdHarness.sol";
 import "test/utils/harnesses/WithCooldownHarness.sol";

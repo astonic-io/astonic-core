@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.8.18;
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
 contract GovernanceTest is Test {
   address public owner = makeAddr("owner");
@@ -15,6 +15,6 @@ contract GovernanceTest is Test {
   uint256 public constant MONTH = 30 days;
   uint256 public constant YEAR = 365 days;
 
-  uint256 public constant BLOCKS_DAY = 17_280; // in CELO
-  uint256 public constant BLOCKS_WEEK = 120_960; // in CELO
+  uint256 public constant BLOCKS_DAY = 17_280; // in PLANQ
+  uint256 public constant BLOCKS_WEEK = 120_960; // in PLANQ
 }

@@ -8,7 +8,7 @@ contract Relock_LockingTest is LockingTest {
   uint256 public lockId;
 
   function test_relock_whenDelegateZero_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 30e18, 3, 3);
@@ -21,7 +21,7 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenInCliff_shouldRelockWithIncreasedAmount() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 30e18, 3, 3);
@@ -31,19 +31,19 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId, alice, 45e18, 9, 0);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 45e18);
-    assertEq(mentoToken.balanceOf(alice), 55e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 45e18);
+    assertEq(astonicToken.balanceOf(alice), 55e18);
 
     _incrementBlock(9 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
   }
 
   function test_relock_whenInCliff_shouldRelockWithNewCliff() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 30e18, 3, 3);
@@ -53,19 +53,19 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId, alice, 30e18, 3, 4);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 30e18);
-    assertEq(mentoToken.balanceOf(alice), 70e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 30e18);
+    assertEq(astonicToken.balanceOf(alice), 70e18);
 
     _incrementBlock(7 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
   }
 
   function test_relock_whenInCliff_sholdRelockWithNewSlope() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 30e18, 3, 3);
@@ -75,19 +75,19 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId, alice, 35e18, 18, 0);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 35e18);
-    assertEq(mentoToken.balanceOf(alice), 65e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 35e18);
+    assertEq(astonicToken.balanceOf(alice), 65e18);
 
     _incrementBlock(18 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
   }
 
   function test_relock_whenInCliff_shouldRelockWithANewSchedle() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 30e18, 3, 3);
@@ -97,26 +97,26 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId, alice, 80e18, 16, 6);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 80e18);
-    assertEq(mentoToken.balanceOf(alice), 20e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 80e18);
+    assertEq(astonicToken.balanceOf(alice), 20e18);
 
     _incrementBlock(6 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 80e18);
-    assertEq(mentoToken.balanceOf(alice), 20e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 80e18);
+    assertEq(astonicToken.balanceOf(alice), 20e18);
 
     _incrementBlock(16 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
   }
 
   function test_relock_wheInSlope_shouldRelockWithNewSchedule() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.startPrank(alice);
     lockId = locking.lock(alice, alice, 300e18, 3, 0);
@@ -124,26 +124,26 @@ contract Relock_LockingTest is LockingTest {
 
     locking.relock(lockId, alice, 800e18, 16, 6);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 800e18);
-    assertEq(mentoToken.balanceOf(alice), 200e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 800e18);
+    assertEq(astonicToken.balanceOf(alice), 200e18);
 
     _incrementBlock(6 * weekInBlocks);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 800e18);
-    assertEq(mentoToken.balanceOf(alice), 200e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 800e18);
+    assertEq(astonicToken.balanceOf(alice), 200e18);
 
     _incrementBlock(16 * weekInBlocks);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 1000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 1000e18);
 
     vm.stopPrank();
   }
 
   function test_relock_whenRelocked_shouldReleaseByTheNewScheduleAfterWithdraw() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.startPrank(alice);
     lockId = locking.lock(alice, alice, 300e18, 3, 0);
@@ -151,26 +151,26 @@ contract Relock_LockingTest is LockingTest {
 
     locking.relock(lockId, alice, 800e18, 16, 6);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 800e18);
-    assertEq(mentoToken.balanceOf(alice), 200e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 800e18);
+    assertEq(astonicToken.balanceOf(alice), 200e18);
 
     _incrementBlock(6 * weekInBlocks);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 800e18);
-    assertEq(mentoToken.balanceOf(alice), 200e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 800e18);
+    assertEq(astonicToken.balanceOf(alice), 200e18);
 
     _incrementBlock(16 * weekInBlocks);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 1000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 1000e18);
 
     vm.stopPrank();
   }
 
   function test_relock_whenInTail_shouldRelockWithNewSchedule() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.startPrank(alice);
     lockId = locking.lock(alice, alice, 370e18, 4, 3);
@@ -181,26 +181,26 @@ contract Relock_LockingTest is LockingTest {
 
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 100e18);
-    assertEq(mentoToken.balanceOf(alice), 900e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 100e18);
+    assertEq(astonicToken.balanceOf(alice), 900e18);
 
     _incrementBlock(2 * weekInBlocks);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 100e18);
-    assertEq(mentoToken.balanceOf(alice), 900e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 100e18);
+    assertEq(astonicToken.balanceOf(alice), 900e18);
 
     _incrementBlock(2 * weekInBlocks);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 1000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 1000e18);
 
     vm.stopPrank();
   }
 
   function test_relock_whenAmountLessThanCurrent_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 38e18, 4, 3);
@@ -212,7 +212,7 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenPeriodTooShort_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 38e18, 4, 3);
@@ -224,19 +224,19 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenAmountIsZero_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 38e18, 4, 3);
     _incrementBlock(2 * weekInBlocks);
 
-    vm.expectRevert("amount is less than minimum");
+    vm.expectRevert("zero amount");
     vm.prank(alice);
     locking.relock(lockId, alice, 0, 5, 1);
   }
 
   function test_relock_whenSlopeIsZero_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 38e18, 4, 3);
@@ -248,7 +248,7 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenCliffIsBig_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 38e18, 4, 3);
@@ -260,7 +260,7 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenSlopeIsBig_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, alice, 38e18, 4, 3);
@@ -272,14 +272,14 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_delegate_withoutRelock() public {
-    mentoToken.mint(alice, 100000e18);
+    astonicToken.mint(alice, 100000e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, bob, 60000e18, 30, 0);
     // 60000 * 30 / 104 = 17307
     assertApproxEqAbs(locking.balanceOf(bob), 17307e18, 1e18);
-    assertEq(mentoToken.balanceOf(address(locking)), 60000e18);
-    assertEq(mentoToken.balanceOf(alice), 40000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 60000e18);
+    assertEq(astonicToken.balanceOf(alice), 40000e18);
 
     _incrementBlock(29 * weekInBlocks);
     // 60000e18 * (30 / 104 ) - 29* ((60000e18 * (30 / 104) - 1) / 30 + 1) = 577e18
@@ -288,8 +288,8 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 2000e18);
-    assertEq(mentoToken.balanceOf(alice), 98000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 2000e18);
+    assertEq(astonicToken.balanceOf(alice), 98000e18);
 
     _incrementBlock(weekInBlocks);
 
@@ -297,12 +297,12 @@ contract Relock_LockingTest is LockingTest {
     locking.withdraw();
 
     assertEq(locking.balanceOf(bob), 0);
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100000e18);
   }
 
   function test_relock_shouldAccountDelegatedAmountCorrectly() public {
-    mentoToken.mint(alice, 100000e18);
+    astonicToken.mint(alice, 100000e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, bob, 60000e18, 30, 0);
@@ -317,8 +317,8 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 20000e18);
-    assertEq(mentoToken.balanceOf(alice), 80000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 20000e18);
+    assertEq(astonicToken.balanceOf(alice), 80000e18);
 
     vm.prank(alice);
     locking.relock(lockId, charlie, 20000e18, 10, 0);
@@ -335,12 +335,12 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100000e18);
   }
 
   function test_relock_whenUnknownLock_shouldRevert() public {
-    mentoToken.mint(alice, 100000e18);
+    astonicToken.mint(alice, 100000e18);
 
     vm.prank(alice);
     lockId = locking.lock(alice, bob, 60000e18, 30, 0);
@@ -360,7 +360,7 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenMultiLinesInCliff_shouldRelockCorrectLine() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 30e18, 3, 3);
@@ -373,26 +373,26 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId2, alice, 60e18, 6, 0);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 90e18);
-    assertEq(mentoToken.balanceOf(alice), 10e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 90e18);
+    assertEq(astonicToken.balanceOf(alice), 10e18);
 
     _incrementBlock(weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 80e18);
-    assertEq(mentoToken.balanceOf(alice), 20e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 80e18);
+    assertEq(astonicToken.balanceOf(alice), 20e18);
 
     _incrementBlock(5 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
   }
 
   function test_relock_whenMultiLinesInCliff_shouldRelockCorrectLine2() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     uint256 lockId1 = locking.lock(alice, alice, 30e18, 3, 3);
@@ -405,26 +405,26 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId1, alice, 50e18, 10, 0);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 100e18);
-    assertEq(mentoToken.balanceOf(alice), 0);
+    assertEq(astonicToken.balanceOf(address(locking)), 100e18);
+    assertEq(astonicToken.balanceOf(alice), 0);
 
     _incrementBlock(weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 95e18);
-    assertEq(mentoToken.balanceOf(alice), 5e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 95e18);
+    assertEq(astonicToken.balanceOf(alice), 5e18);
 
     _incrementBlock(9 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
   }
 
   function test_relock_whenMultiLinesCutCorner_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
+    astonicToken.mint(alice, 100e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 30e18, 3, 3);
@@ -440,7 +440,7 @@ contract Relock_LockingTest is LockingTest {
   }
 
   function test_relock_whenMultiLinesInSlope_shouldRelockCorrectly() public {
-    mentoToken.mint(alice, 1000e18);
+    astonicToken.mint(alice, 1000e18);
 
     vm.prank(alice);
     locking.lock(alice, alice, 300e18, 3, 0);
@@ -453,35 +453,35 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(alice);
     locking.relock(lockId2, alice, 600e18, 12, 0);
 
-    assertEq(mentoToken.balanceOf(address(locking)), 700e18);
-    assertEq(mentoToken.balanceOf(alice), 300e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 700e18);
+    assertEq(astonicToken.balanceOf(alice), 300e18);
 
     _incrementBlock(weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 550e18);
-    assertEq(mentoToken.balanceOf(alice), 450e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 550e18);
+    assertEq(astonicToken.balanceOf(alice), 450e18);
 
     _incrementBlock(11 * weekInBlocks);
     vm.prank(alice);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 1000e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 1000e18);
   }
 
   function test_relock_whenMultiAccountsInCliff_shouldRelockCorrectly() public {
-    mentoToken.mint(alice, 100e18);
-    mentoToken.mint(bob, 100e18);
-    mentoToken.mint(charlie, 100e18);
+    astonicToken.mint(alice, 100e18);
+    astonicToken.mint(bob, 100e18);
+    astonicToken.mint(charlie, 100e18);
 
     vm.prank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     vm.prank(bob);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     vm.prank(charlie);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
 
     vm.prank(alice);
     locking.lock(alice, alice, 20e18, 4, 2);
@@ -504,10 +504,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 80e18);
-    assertEq(mentoToken.balanceOf(alice), 90e18);
-    assertEq(mentoToken.balanceOf(bob), 70e18);
-    assertEq(mentoToken.balanceOf(charlie), 60e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 80e18);
+    assertEq(astonicToken.balanceOf(alice), 90e18);
+    assertEq(astonicToken.balanceOf(bob), 70e18);
+    assertEq(astonicToken.balanceOf(charlie), 60e18);
 
     _incrementBlock(weekInBlocks);
 
@@ -518,10 +518,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 65e18);
-    assertEq(mentoToken.balanceOf(alice), 95e18);
-    assertEq(mentoToken.balanceOf(bob), 70e18);
-    assertEq(mentoToken.balanceOf(charlie), 70e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 65e18);
+    assertEq(astonicToken.balanceOf(alice), 95e18);
+    assertEq(astonicToken.balanceOf(bob), 70e18);
+    assertEq(astonicToken.balanceOf(charlie), 70e18);
 
     _incrementBlock(weekInBlocks);
 
@@ -532,10 +532,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 45e18);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertEq(mentoToken.balanceOf(bob), 75e18);
-    assertEq(mentoToken.balanceOf(charlie), 80e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 45e18);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(bob), 75e18);
+    assertEq(astonicToken.balanceOf(charlie), 80e18);
 
     _incrementBlock(2 * weekInBlocks);
 
@@ -546,10 +546,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 15e18);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertEq(mentoToken.balanceOf(bob), 85e18);
-    assertEq(mentoToken.balanceOf(charlie), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 15e18);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(bob), 85e18);
+    assertEq(astonicToken.balanceOf(charlie), 100e18);
 
     _incrementBlock(3 * weekInBlocks);
 
@@ -560,23 +560,23 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertEq(mentoToken.balanceOf(bob), 100e18);
-    assertEq(mentoToken.balanceOf(charlie), 100e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(bob), 100e18);
+    assertEq(astonicToken.balanceOf(charlie), 100e18);
   }
 
   function test_relock_whenMultiAccountsInTail_shouldRelockCorrectly() public {
-    mentoToken.mint(alice, 100e18);
-    mentoToken.mint(bob, 100e18);
-    mentoToken.mint(charlie, 100e18);
+    astonicToken.mint(alice, 100e18);
+    astonicToken.mint(bob, 100e18);
+    astonicToken.mint(charlie, 100e18);
 
     vm.prank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     vm.prank(bob);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
     vm.prank(charlie);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
 
     vm.prank(alice);
     locking.lock(alice, alice, 20e18, 4, 2);
@@ -599,10 +599,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 42e18);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertEq(mentoToken.balanceOf(bob), 78e18);
-    assertEq(mentoToken.balanceOf(charlie), 80e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 42e18);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(bob), 78e18);
+    assertEq(astonicToken.balanceOf(charlie), 80e18);
 
     _incrementBlock(weekInBlocks);
 
@@ -613,10 +613,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 32e18);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertEq(mentoToken.balanceOf(bob), 78e18);
-    assertEq(mentoToken.balanceOf(charlie), 90e18);
+    assertEq(astonicToken.balanceOf(address(locking)), 32e18);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(bob), 78e18);
+    assertEq(astonicToken.balanceOf(charlie), 90e18);
 
     _incrementBlock(weekInBlocks);
 
@@ -627,10 +627,10 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertApproxEqAbs(mentoToken.balanceOf(address(locking)), 17e18, 1e18);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertApproxEqAbs(mentoToken.balanceOf(bob), 83e18, 1e18);
-    assertEq(mentoToken.balanceOf(charlie), 100e18);
+    assertApproxEqAbs(astonicToken.balanceOf(address(locking)), 17e18, 1e18);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertApproxEqAbs(astonicToken.balanceOf(bob), 83e18, 1e18);
+    assertEq(astonicToken.balanceOf(charlie), 100e18);
 
     _incrementBlock(4 * weekInBlocks);
 
@@ -641,34 +641,9 @@ contract Relock_LockingTest is LockingTest {
     vm.prank(charlie);
     locking.withdraw();
 
-    assertEq(mentoToken.balanceOf(address(locking)), 0);
-    assertEq(mentoToken.balanceOf(alice), 100e18);
-    assertEq(mentoToken.balanceOf(bob), 100e18);
-    assertEq(mentoToken.balanceOf(charlie), 100e18);
-  }
-
-  function test_relock_whenAmountLessThanMinimum_shouldRevert() public {
-    mentoToken.mint(alice, 100e18);
-
-    vm.prank(alice);
-    lockId = locking.lock(alice, alice, 30e18, 3, 3);
-
-    _incrementBlock(6 * weekInBlocks);
-
-    vm.expectRevert("amount is less than minimum");
-    vm.prank(alice);
-    locking.relock(lockId, alice, 0.5e18, 3, 3);
-  }
-
-  function test_relock_whenAmountIsMinimum_shouldRelockSuccessfully() public {
-    mentoToken.mint(alice, 100e18);
-
-    vm.prank(alice);
-    lockId = locking.lock(alice, alice, 30e18, 3, 3);
-
-    _incrementBlock(6 * weekInBlocks);
-
-    vm.prank(alice);
-    locking.relock(lockId, alice, 1e18, 3, 3);
+    assertEq(astonicToken.balanceOf(address(locking)), 0);
+    assertEq(astonicToken.balanceOf(alice), 100e18);
+    assertEq(astonicToken.balanceOf(bob), 100e18);
+    assertEq(astonicToken.balanceOf(charlie), 100e18);
   }
 }

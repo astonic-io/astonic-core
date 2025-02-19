@@ -7,11 +7,11 @@ import { Ownable } from "openzeppelin-contracts-next/contracts/access/Ownable.so
 import { Pausable } from "openzeppelin-contracts-next/contracts/security/Pausable.sol";
 
 /**
- * @title Mento Token
- * @author Mento Labs
- * @notice This contract represents the Mento Protocol Token which is a Burnable ERC20 token.
+ * @title Astonic Token
+ * @author Astonic Labs
+ * @notice This contract represents the Astonic Protocol Token which is a Burnable ERC20 token.
  */
-contract MentoToken is Ownable, Pausable, ERC20Burnable {
+contract AstonicToken is Ownable, Pausable, ERC20Burnable {
   /// @notice The address of the locking contract that has the capability to transfer tokens
   /// even when the contract is paused.
   address public immutable locking;
@@ -28,7 +28,7 @@ contract MentoToken is Ownable, Pausable, ERC20Burnable {
 
   // solhint-disable max-line-length
   /**
-   * @dev Constructor for the MentoToken contract.
+   * @dev Constructor for the AstonicToken contract.
    * @notice It mints and allocates the initial token supply among several contracts.
    * @param allocationRecipients_ The addresses of the initial token recipients.
    * @param allocationAmounts_ The percentage of tokens to be allocated to each recipient.
@@ -41,12 +41,12 @@ contract MentoToken is Ownable, Pausable, ERC20Burnable {
     uint256[] memory allocationAmounts_,
     address emission_,
     address locking_
-  ) ERC20("Mento Token", "MENTO") Ownable() {
-    require(emission_ != address(0), "MentoToken: emission is zero address");
-    require(locking_ != address(0), "MentoToken: locking is zero address");
+  ) ERC20("Astonic Token", "ATC") Ownable() {
+    require(emission_ != address(0), "AstonicToken: emission is zero address");
+    require(locking_ != address(0), "AstonicToken: locking is zero address");
     require(
       allocationRecipients_.length == allocationAmounts_.length,
-      "MentoToken: recipients and amounts length mismatch"
+      "AstonicToken: recipients and amounts length mismatch"
     );
 
     locking = locking_;
@@ -57,14 +57,14 @@ contract MentoToken is Ownable, Pausable, ERC20Burnable {
     // slither-disable-next-line uninitialized-local
     uint256 totalAllocated;
     for (uint256 i = 0; i < allocationRecipients_.length; i++) {
-      require(allocationRecipients_[i] != address(0), "MentoToken: allocation recipient is zero address");
+      require(allocationRecipients_[i] != address(0), "AstonicToken: allocation recipient is zero address");
 
       if (allocationAmounts_[i] == 0) continue;
 
       totalAllocated += allocationAmounts_[i];
       _mint(allocationRecipients_[i], (supply * allocationAmounts_[i]) / 1000);
     }
-    require(totalAllocated <= 1000, "MentoToken: total allocation exceeds 100%");
+    require(totalAllocated <= 1000, "AstonicToken: total allocation exceeds 100%");
     emissionSupply = (supply * (1000 - totalAllocated)) / 1000;
 
     _pause();
@@ -76,7 +76,7 @@ contract MentoToken is Ownable, Pausable, ERC20Burnable {
    * Requirements: caller must be the owner
    */
   function unpause() public virtual onlyOwner {
-    require(paused(), "MentoToken: token is not paused");
+    require(paused(), "AstonicToken: token is not paused");
     _unpause();
   }
 
@@ -88,8 +88,8 @@ contract MentoToken is Ownable, Pausable, ERC20Burnable {
    * @param amount Amount of tokens to be minted.
    */
   function mint(address target, uint256 amount) external {
-    require(msg.sender == emission, "MentoToken: only emission contract");
-    require(emittedAmount + amount <= emissionSupply, "MentoToken: emission supply exceeded");
+    require(msg.sender == emission, "AstonicToken: only emission contract");
+    require(emittedAmount + amount <= emissionSupply, "AstonicToken: emission supply exceeded");
 
     emittedAmount += amount;
     _mint(target, amount);
@@ -105,14 +105,14 @@ contract MentoToken is Ownable, Pausable, ERC20Burnable {
   function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override {
     super._beforeTokenTransfer(from, to, amount);
 
-    require(to != address(this), "MentoToken: cannot transfer tokens to token contract");
+    require(to != address(this), "AstonicToken: cannot transfer tokens to token contract");
     // Token transfers are only possible if the contract is not paused
     // OR if triggered by the owner of the contract
     // OR if triggered by the locking contract
     // OR if triggered by the emission contract
     require(
       !paused() || owner() == _msgSender() || locking == _msgSender() || emission == _msgSender(),
-      "MentoToken: token transfer while paused"
+      "AstonicToken: token transfer while paused"
     );
   }
 }

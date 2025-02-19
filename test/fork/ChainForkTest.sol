@@ -27,7 +27,7 @@ abstract contract ChainForkTest is BaseForkTest {
     IBiPoolManager biPoolManager = IBiPoolManager(broker.getExchangeProviders()[0]);
 
     vm.expectRevert("contract already initialized");
-    biPoolManager.initialize(address(broker), mentoReserve, sortedOracles, breakerBox);
+    biPoolManager.initialize(address(broker), astonicReserve, sortedOracles, breakerBox);
   }
 
   function test_brokerCanNotBeReinitialized() public {
@@ -42,7 +42,7 @@ abstract contract ChainForkTest is BaseForkTest {
 
   function test_reserveCanNotBeReinitialized() public {
     vm.expectRevert("contract already initialized");
-    mentoReserve.initialize(
+    astonicReserve.initialize(
       address(10),
       0,
       0,
@@ -82,10 +82,10 @@ abstract contract ChainForkTest is BaseForkTest {
   function test_numberCollateralAssetsCount() public {
     address collateral;
     for (uint256 i = 0; i < COLLATERAL_ASSETS_COUNT; i++) {
-      collateral = mentoReserve.collateralAssets(i);
+      collateral = astonicReserve.collateralAssets(i);
     }
     vm.expectRevert();
-    mentoReserve.collateralAssets(COLLATERAL_ASSETS_COUNT);
+    astonicReserve.collateralAssets(COLLATERAL_ASSETS_COUNT);
   }
 
   function test_stableTokensCanNotBeReinitialized() public {

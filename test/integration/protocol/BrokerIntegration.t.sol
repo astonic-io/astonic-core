@@ -8,7 +8,7 @@ import { IERC20 } from "contracts/interfaces/IERC20.sol";
 import { IExchangeProvider } from "contracts/interfaces/IExchangeProvider.sol";
 import { IBiPoolManager } from "contracts/interfaces/IBiPoolManager.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 // forge test --match-contract BrokerIntegration -vvv
 contract BrokerIntegrationTest is ProtocolTest {
@@ -24,9 +24,9 @@ contract BrokerIntegrationTest is ProtocolTest {
     deal(address(cUSDToken), trader, 10 ** 22, true); // Mint 10k to trader
     deal(address(cEURToken), trader, 10 ** 22, true); // Mint 10k to trader
 
-    deal(address(celoToken), trader, 1000 * 10 ** 18, true); // Gift 10k to trader
+    deal(address(planqToken), trader, 1000 * 10 ** 18, true); // Gift 10k to trader
 
-    deal(address(celoToken), address(reserve), 10 ** (6 + 18), true); // Gift 1Mil Celo to reserve
+    deal(address(planqToken), address(reserve), 10 ** (6 + 18), true); // Gift 1Mil Astonic to reserve
     deal(address(usdcToken), address(reserve), 10 ** (6 + 6), true); // Gift 1Mil USDC to reserve
   }
 
@@ -88,7 +88,7 @@ contract BrokerIntegrationTest is ProtocolTest {
       );
       assert(
         exchange.assets[1] == address(cEURToken) ||
-          exchange.assets[1] == address(celoToken) ||
+          exchange.assets[1] == address(planqToken) ||
           exchange.assets[1] == address(usdcToken) ||
           exchange.assets[1] == address(eurocToken)
       );
@@ -232,11 +232,11 @@ contract BrokerIntegrationTest is ProtocolTest {
     assertEq(tokenInSupplyBefore - amountIn, tokenInSupplyAfter);
   }
 
-  function test_swapIn_CELOTocEUR() public {
+  function test_swapIn_PLANQTocEUR() public {
     uint256 amountIn = 1000 * 10 ** 18; // 1k
-    IERC20 tokenIn = IERC20(address(celoToken));
+    IERC20 tokenIn = IERC20(address(planqToken));
     IERC20 tokenOut = IERC20(address(cEURToken));
-    bytes32 poolId = pair_cEUR_CELO_ID;
+    bytes32 poolId = pair_cEUR_PLQ_ID;
 
     // Get amounts before swap
     uint256 traderTokenInBefore = tokenIn.balanceOf(trader);
@@ -267,11 +267,11 @@ contract BrokerIntegrationTest is ProtocolTest {
     assertEq(StableAssetSupplyBefore + expectedOut, StableAssetSupplyAfter);
   }
 
-  function test_swapIn_CELOTocUSD() public {
+  function test_swapIn_PLANQTocUSD() public {
     uint256 amountIn = 1000 * 10 ** 18; // 1k
-    IERC20 tokenIn = IERC20(address(celoToken));
+    IERC20 tokenIn = IERC20(address(planqToken));
     IERC20 tokenOut = IERC20(address(cUSDToken));
-    bytes32 poolId = pair_cUSD_CELO_ID;
+    bytes32 poolId = pair_cUSD_PLQ_ID;
 
     // Get amounts before swap
     uint256 traderTokenInBefore = tokenIn.balanceOf(trader);

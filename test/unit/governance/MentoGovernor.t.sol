@@ -7,17 +7,17 @@ import { IVotesUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 import { GovernanceTest } from "./GovernanceTest.sol";
 
 import { TimelockController } from "contracts/governance/TimelockController.sol";
-import { MentoGovernor } from "contracts/governance/MentoGovernor.sol";
+import { AstonicGovernor } from "contracts/governance/AstonicGovernor.sol";
 
 import { MockOwnable } from "test/utils/mocks/MockOwnable.sol";
-import { MockVeMento } from "test/utils/mocks/MockVeMento.sol";
+import { MockVeAstonic } from "test/utils/mocks/MockVeAstonic.sol";
 
-contract MentoGovernorTest is GovernanceTest {
+contract AstonicGovernorTest is GovernanceTest {
   TimelockController public timelockController;
-  MentoGovernor public mentoGovernor;
+  AstonicGovernor public astonicGovernor;
 
   MockOwnable public mockOwnable;
-  MockVeMento public mockVeMento;
+  MockVeAstonic public mockVeAstonic;
 
   uint256 public votingDelay = BLOCKS_DAY;
   uint256 public votingPeriod = BLOCKS_WEEK;
@@ -29,18 +29,18 @@ contract MentoGovernorTest is GovernanceTest {
   function setUp() public {
     vm.startPrank(owner);
 
-    mockVeMento = new MockVeMento();
+    mockVeAstonic = new MockVeAstonic();
     mockOwnable = new MockOwnable();
 
     timelockController = new TimelockController();
-    mentoGovernor = new MentoGovernor();
+    astonicGovernor = new AstonicGovernor();
 
     address[] memory proposers;
     address[] memory executors;
 
-    timelockController.__MentoTimelockController_init(1 days, proposers, executors, owner, communityMultisig);
-    mentoGovernor.__MentoGovernor_init(
-      IVotesUpgradeable(address(mockVeMento)),
+    timelockController.__AstonicTimelockController_init(1 days, proposers, executors, owner, communityMultisig);
+    astonicGovernor.__AstonicGovernor_init(
+      IVotesUpgradeable(address(mockVeAstonic)),
       timelockController,
       votingDelay,
       votingPeriod,
@@ -54,7 +54,7 @@ contract MentoGovernorTest is GovernanceTest {
     bytes32 executorRole = timelockController.EXECUTOR_ROLE();
     bytes32 adminRole = timelockController.TIMELOCK_ADMIN_ROLE();
 
-    timelockController.grantRole(proposerRole, address(mentoGovernor));
+    timelockController.grantRole(proposerRole, address(astonicGovernor));
     timelockController.grantRole(executorRole, address(0));
     timelockController.revokeRole(adminRole, owner);
 
@@ -62,10 +62,10 @@ contract MentoGovernorTest is GovernanceTest {
   }
 
   function test_init_shouldSetStateCorrectly() public view {
-    assertEq(mentoGovernor.votingDelay(), BLOCKS_DAY);
-    assertEq(mentoGovernor.votingPeriod(), BLOCKS_WEEK);
-    assertEq(mentoGovernor.proposalThreshold(), 1_000e18);
-    assertEq(mentoGovernor.quorumNumerator(), 10);
+    assertEq(astonicGovernor.votingDelay(), BLOCKS_DAY);
+    assertEq(astonicGovernor.votingPeriod(), BLOCKS_WEEK);
+    assertEq(astonicGovernor.proposalThreshold(), 1_000e18);
+    assertEq(astonicGovernor.quorumNumerator(), 10);
     assertEq(timelockController.getMinDelay(), 1 days);
   }
 
@@ -75,7 +75,7 @@ contract MentoGovernorTest is GovernanceTest {
     bytes32 adminRole = timelockController.TIMELOCK_ADMIN_ROLE();
     bytes32 cancellerRole = timelockController.CANCELLER_ROLE();
 
-    assert(timelockController.hasRole(proposerRole, address(mentoGovernor)));
+    assert(timelockController.hasRole(proposerRole, address(astonicGovernor)));
     assert(timelockController.hasRole(executorRole, (address(0))));
     assertFalse(timelockController.hasRole(adminRole, owner));
     assert(timelockController.hasRole(cancellerRole, communityMultisig));
@@ -87,11 +87,11 @@ contract MentoGovernorTest is GovernanceTest {
     vm.expectRevert("Governor: proposer votes below proposal threshold");
     _proposeCallProtectedFunction();
 
-    mockVeMento.mint(alice, threshold - 1e18);
+    mockVeAstonic.mint(alice, threshold - 1e18);
     vm.expectRevert("Governor: proposer votes below proposal threshold");
     _proposeCallProtectedFunction();
 
-    mockVeMento.mint(alice, 1e18 - 1);
+    mockVeAstonic.mint(alice, 1e18 - 1);
     vm.expectRevert("Governor: proposer votes below proposal threshold");
     _proposeCallProtectedFunction();
 
@@ -99,7 +99,7 @@ contract MentoGovernorTest is GovernanceTest {
   }
 
   function test_propose_whenProposerAboveThreshold_shouldCreateProposal() public {
-    mockVeMento.mint(alice, threshold);
+    mockVeAstonic.mint(alice, threshold);
 
     vm.prank(alice);
     (
@@ -112,38 +112,38 @@ contract MentoGovernorTest is GovernanceTest {
 
     uint256 hashedParams = _hashProposal(targets, values, calldatas, description);
     assertEq(proposalId, hashedParams);
-    assertEq(uint256(mentoGovernor.state(hashedParams)), 0);
+    assertEq(uint256(astonicGovernor.state(hashedParams)), 0);
   }
 
   function test_castVote_whenInVotingDelay_shouldRevert() public {
-    mockVeMento.mint(alice, threshold);
+    mockVeAstonic.mint(alice, threshold);
 
     vm.prank(alice);
     (uint256 proposalId, , , , ) = _proposeCallProtectedFunction();
 
     vm.expectRevert("Governor: vote not currently active");
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
   }
 
   function test_castVote_whenVotingPeriodEnds_shouldRevert() public {
-    mockVeMento.mint(alice, threshold);
+    mockVeAstonic.mint(alice, threshold);
     vm.prank(alice);
     (uint256 proposalId, , , , ) = _proposeCallProtectedFunction();
 
     vm.roll(block.number + votingDelay + votingPeriod + 1);
 
-    assertEq(uint256(mentoGovernor.state(proposalId)), 3); // defeated
+    assertEq(uint256(astonicGovernor.state(proposalId)), 3); // defeated
 
     vm.expectRevert("Governor: vote not currently active");
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
   }
 
   function test_castVote_whenNotEnoughForVotes_shouldDefeatProposal() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 1_001e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 1_001e18);
 
     vm.prank(alice);
     (uint256 proposalId, , , , ) = _proposeCallProtectedFunction();
@@ -151,17 +151,17 @@ contract MentoGovernorTest is GovernanceTest {
     vm.roll(block.number + votingDelay + 1);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.roll(block.number + votingPeriod);
-    assertEq(uint256(mentoGovernor.state(proposalId)), 3); // defeated
+    assertEq(uint256(astonicGovernor.state(proposalId)), 3); // defeated
   }
 
   function test_castVote_whenNoQuorum_shouldDefeatProposal() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 100e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 100e18);
 
     vm.prank(alice);
     (uint256 proposalId, , , , ) = _proposeCallProtectedFunction();
@@ -169,37 +169,37 @@ contract MentoGovernorTest is GovernanceTest {
     vm.roll(block.number + votingDelay + 1);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.roll(block.number + votingPeriod);
-    assertEq(uint256(mentoGovernor.state(proposalId)), 3); // defeated
+    assertEq(uint256(astonicGovernor.state(proposalId)), 3); // defeated
   }
 
   function test_castVote_whenEnoughQuorumAndForVotes_shouldSucceedProposal() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (uint256 proposalId, , , , ) = _proposeCallProtectedFunction();
 
     vm.roll(block.number + votingDelay + 1);
 
-    assertEq(uint256(mentoGovernor.state(proposalId)), 1); // active
+    assertEq(uint256(astonicGovernor.state(proposalId)), 1); // active
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.roll(block.number + votingPeriod);
-    assertEq(uint256(mentoGovernor.state(proposalId)), 4); // succeeded
+    assertEq(uint256(astonicGovernor.state(proposalId)), 4); // succeeded
   }
 
   function test_queueAndExecute_whenNotCorrectState_shouldRevert() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (
@@ -211,47 +211,47 @@ contract MentoGovernorTest is GovernanceTest {
     ) = _proposeCallProtectedFunction();
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
 
     // keeping block.ts and block.number in sync
     vm.roll(block.number + votingDelay + 1);
     skip(1 days);
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.roll(block.number + votingPeriod);
     skip(7 days);
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
   }
 
   function test_execute_whenTimelocked_shouldRevert() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (
@@ -267,24 +267,24 @@ contract MentoGovernorTest is GovernanceTest {
     skip(1 days);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.roll(block.number + votingPeriod);
     skip(7 days);
 
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("TimelockController: operation is not ready");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
   }
 
   function test_execute_shouldExecuteProposal_whenTimelockExpires() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (
@@ -300,30 +300,30 @@ contract MentoGovernorTest is GovernanceTest {
     skip(1 days);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.roll(block.number + votingPeriod);
     skip(7 days);
 
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.roll(block.number + BLOCKS_DAY);
     skip(1 days);
 
     assertEq(mockOwnable.protected(), 0);
 
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
 
     assertEq(mockOwnable.protected(), 1337);
   }
 
   function test_queueAndexecute_whenRetried_shouldRevert() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (
@@ -339,36 +339,36 @@ contract MentoGovernorTest is GovernanceTest {
     skip(1 days);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.roll(block.number + votingPeriod);
     skip(7 days);
 
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.roll(block.number + BLOCKS_DAY);
     skip(1 days);
 
     assertEq(mockOwnable.protected(), 0);
 
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
 
     assertEq(mockOwnable.protected(), 1337);
   }
 
   function test_cancel_whenCalledByCanceller_shouldBlockQueuedProposal() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (
@@ -386,15 +386,15 @@ contract MentoGovernorTest is GovernanceTest {
     skip(1 days);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.roll(block.number + votingPeriod);
     skip(7 days);
 
-    mentoGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.queue(targets, values, calldatas, keccak256(bytes(description)));
 
     vm.prank(alice);
     vm.expectRevert();
@@ -407,13 +407,13 @@ contract MentoGovernorTest is GovernanceTest {
     skip(1 days);
 
     vm.expectRevert("Governor: proposal not successful");
-    mentoGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
+    astonicGovernor.execute(targets, values, calldatas, keccak256(bytes(description)));
   }
 
   function test_cancel_whenCalledBeforeQueue_shouldRevert() public {
-    mockVeMento.mint(alice, threshold);
-    mockVeMento.mint(bob, 1_000e18);
-    mockVeMento.mint(charlie, 2_000e18);
+    mockVeAstonic.mint(alice, threshold);
+    mockVeAstonic.mint(bob, 1_000e18);
+    mockVeAstonic.mint(charlie, 2_000e18);
 
     vm.prank(alice);
     (
@@ -439,10 +439,10 @@ contract MentoGovernorTest is GovernanceTest {
     timelockController.cancel(tlId);
 
     vm.prank(bob);
-    mentoGovernor.castVote(proposalId, 0);
+    astonicGovernor.castVote(proposalId, 0);
 
     vm.prank(charlie);
-    mentoGovernor.castVote(proposalId, 1);
+    astonicGovernor.castVote(proposalId, 1);
 
     vm.prank(communityMultisig);
     vm.expectRevert("TimelockController: operation cannot be cancelled");
@@ -480,7 +480,7 @@ contract MentoGovernorTest is GovernanceTest {
 
     description = "Set protected value to 1337";
 
-    proposalId = mentoGovernor.propose(targets, values, calldatas, description);
+    proposalId = astonicGovernor.propose(targets, values, calldatas, description);
   }
 
   function _hashProposal(

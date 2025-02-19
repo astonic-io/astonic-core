@@ -16,9 +16,9 @@ contract BrokerGasTest is ProtocolTest {
     deal(address(cUSDToken), trader, 10 ** 22, true); // Mint 10k to trader
     deal(address(cEURToken), trader, 10 ** 22, true); // Mint 10k to trader
 
-    deal(address(celoToken), trader, 1000 * 10 ** 18); // Gift 10k to trader
+    deal(address(planqToken), trader, 1000 * 10 ** 18); // Gift 10k to trader
 
-    deal(address(celoToken), address(reserve), 10 ** 24); // Gift 1Mil to reserve
+    deal(address(planqToken), address(reserve), 10 ** 24); // Gift 1Mil to reserve
     deal(address(usdcToken), address(reserve), 10 ** 24); // Gift 1Mil to reserve
   }
 
@@ -71,38 +71,38 @@ contract BrokerGasTest is ProtocolTest {
     doSwapIn(poolId, amountIn, address(tokenIn), address(tokenOut));
   }
 
-  function test_gas_swapIn_CELOTocEUR() public {
+  function test_gas_swapIn_PLANQTocEUR() public {
     uint256 amountIn = 1000 * 10 ** 18; // 1k
-    IERC20 tokenIn = IERC20(address(celoToken));
+    IERC20 tokenIn = IERC20(address(planqToken));
     IERC20 tokenOut = IERC20(address(cEURToken));
-    bytes32 poolId = pair_cEUR_CELO_ID;
+    bytes32 poolId = pair_cEUR_PLQ_ID;
 
     doSwapIn(poolId, amountIn, address(tokenIn), address(tokenOut));
   }
 
-  function test_gas_swapIn_CELOTocUSD() public {
+  function test_gas_swapIn_PLANQTocUSD() public {
     uint256 amountIn = 1000 * 10 ** 18; // 1k
-    IERC20 tokenIn = IERC20(address(celoToken));
+    IERC20 tokenIn = IERC20(address(planqToken));
     IERC20 tokenOut = IERC20(address(cUSDToken));
-    bytes32 poolId = pair_cUSD_CELO_ID;
+    bytes32 poolId = pair_cUSD_PLQ_ID;
 
     doSwapIn(poolId, amountIn, address(tokenIn), address(tokenOut));
   }
 
-  function test_gas_swapIn_CUSDToCelo() public {
+  function test_gas_swapIn_CUSDToPlanq() public {
     uint256 amountIn = 1000 * 10 ** 18; // 1k
     IERC20 tokenIn = IERC20(address(cUSDToken));
-    IERC20 tokenOut = IERC20(address(celoToken));
-    bytes32 poolId = pair_cUSD_CELO_ID;
+    IERC20 tokenOut = IERC20(address(planqToken));
+    bytes32 poolId = pair_cUSD_PLQ_ID;
 
     doSwapIn(poolId, amountIn, address(tokenIn), address(tokenOut));
   }
 
-  function test_gas_swapIn_CEURToCelo() public {
+  function test_gas_swapIn_CEURToPlanq() public {
     uint256 amountIn = 1000 * 10 ** 18; // 1k
     IERC20 tokenIn = IERC20(address(cEURToken));
-    IERC20 tokenOut = IERC20(address(celoToken));
-    bytes32 poolId = pair_cEUR_CELO_ID;
+    IERC20 tokenOut = IERC20(address(planqToken));
+    bytes32 poolId = pair_cEUR_PLQ_ID;
 
     doSwapIn(poolId, amountIn, address(tokenIn), address(tokenOut));
   }

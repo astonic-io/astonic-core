@@ -11,7 +11,7 @@ import { UD60x18, ud, intoUint256 } from "prb/math/UD60x18.sol";
  * relayer.
  * @dev SortedOracles is a Solidity 5.13 contract, thus we can't import the
  * interface directly, so we use a minimal hand-copied one.
- * See https://github.com/mento-protocol/mento-core/blob/develop/contracts/common/SortedOracles.sol
+ * See https://github.com/planq-network/astonic-core/blob/develop/contracts/common/SortedOracles.sol
  */
 interface ISortedOraclesMin {
   function report(address rateFeedId, uint256 value, address lesserKey, address greaterKey) external;
@@ -35,9 +35,9 @@ interface ISortedOraclesMin {
  * to the rest of the protocol. This is needed because it is more efficient for oracle providers
  * to report FX rates against the dollar and crypto-asset rates against the dollar,
  * instead of all possible combinations.
- * For example, for the Philippine Peso, Chainlink reports PHP/USD, but does not report CELO/PHP
- * which is required to pay for gas in a PHP stable token. But using both PHP/USD and CELO/USD,
- * one can create a path: CELO/USD * inverse(PHP/USD) = CELO/PHP.
+ * For example, for the Philippine Peso, Chainlink reports PHP/USD, but does not report PLANQ/PHP
+ * which is required to pay for gas in a PHP stable token. But using both PHP/USD and PLANQ/USD,
+ * one can create a path: PLANQ/USD * inverse(PHP/USD) = PLANQ/PHP.
  * Because of this we can provide up to four Chainlink price sources with inversion settings
  * to the relayer, a price path. The path segments are chained through multiplication and
  * inversion to derive the rate.
@@ -70,7 +70,7 @@ contract ChainlinkRelayerV1 is IChainlinkRelayer {
   address private immutable aggregator2;
   address private immutable aggregator3;
 
-  /// @notice The invert setting for each aggregator, if true it flips the rate feed, i.e. CELO/USD -> USD/CELO.
+  /// @notice The invert setting for each aggregator, if true it flips the rate feed, i.e. PLANQ/USD -> USD/PLANQ.
   bool private immutable invert0;
   bool private immutable invert1;
   bool private immutable invert2;

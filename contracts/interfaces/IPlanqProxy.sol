@@ -2,7 +2,7 @@
 // slither-disable-start naming-convention
 pragma solidity >=0.5.17 <0.8.19;
 
-interface ICeloProxy {
+interface IPlanqProxy {
   function _getImplementation() external view returns (address);
 
   function _getOwner() external view returns (address);

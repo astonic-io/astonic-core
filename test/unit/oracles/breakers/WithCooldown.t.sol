@@ -3,7 +3,7 @@
 // solhint-disable const-name-snakecase, max-states-count, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 import { IWithCooldownHarness } from "test/utils/harnesses/IWithCooldownHarness.sol";
 
 contract WithCooldownTest is Test {

@@ -4,7 +4,7 @@
 pragma solidity ^0.8.18;
 
 import { console } from "forge-std/console.sol";
-import { Test } from "mento-std/Test.sol";
+import { Test } from "test/utils/Test.sol";
 
 import "test/utils/mocks/MockAggregatorV3.sol";
 import "contracts/interfaces/IChainlinkRelayer.sol";
@@ -92,7 +92,7 @@ contract ChainlinkRelayerV1Test is Test {
 
     uint256 maxTimestampSpread = aggregatorsCount > 1 ? 300 : 0;
     relayer = IChainlinkRelayer(
-      new ChainlinkRelayerV1(rateFeedId, "CELO/USD", address(sortedOracles), maxTimestampSpread, aggregators)
+      new ChainlinkRelayerV1(rateFeedId, "PLQ/USD", address(sortedOracles), maxTimestampSpread, aggregators)
     );
     sortedOracles.addOracle(rateFeedId, address(relayer));
   }
@@ -121,7 +121,7 @@ contract ChainlinkRelayerV1Test_constructor_invalid is ChainlinkRelayerV1Test {
     vm.expectRevert(NO_AGGREGATORS_ERROR);
     new ChainlinkRelayerV1(
       rateFeedId,
-      "CELO/USD",
+      "PLQ/USD",
       address(sortedOracles),
       0,
       new IChainlinkRelayer.ChainlinkAggregator[](0)
@@ -132,7 +132,7 @@ contract ChainlinkRelayerV1Test_constructor_invalid is ChainlinkRelayerV1Test {
     vm.expectRevert(TOO_MANY_AGGREGATORS_ERROR);
     new ChainlinkRelayerV1(
       rateFeedId,
-      "CELO/USD",
+      "PLQ/USD",
       address(sortedOracles),
       300,
       new IChainlinkRelayer.ChainlinkAggregator[](5)
@@ -143,7 +143,7 @@ contract ChainlinkRelayerV1Test_constructor_invalid is ChainlinkRelayerV1Test {
     vm.expectRevert(INVALID_AGGREGATOR_ERROR);
     new ChainlinkRelayerV1(
       rateFeedId,
-      "CELO/USD",
+      "PLQ/USD",
       address(sortedOracles),
       0,
       new IChainlinkRelayer.ChainlinkAggregator[](1)
@@ -154,7 +154,7 @@ contract ChainlinkRelayerV1Test_constructor_invalid is ChainlinkRelayerV1Test {
     vm.expectRevert(INVALID_MAX_TIMESTAMP_SPREAD_ERROR);
     new ChainlinkRelayerV1(
       rateFeedId,
-      "CELO/USD",
+      "PLQ/USD",
       address(sortedOracles),
       0,
       new IChainlinkRelayer.ChainlinkAggregator[](2)
@@ -165,7 +165,7 @@ contract ChainlinkRelayerV1Test_constructor_invalid is ChainlinkRelayerV1Test {
     vm.expectRevert(INVALID_MAX_TIMESTAMP_SPREAD_ERROR);
     new ChainlinkRelayerV1(
       rateFeedId,
-      "CELO/USD",
+      "PLQ/USD",
       address(sortedOracles),
       300,
       new IChainlinkRelayer.ChainlinkAggregator[](1)
@@ -195,7 +195,7 @@ contract ChainlinkRelayerV1Test_constructor_single is ChainlinkRelayerV1Test {
 
   function test_constructorSetsRateFeedDescription() public {
     string memory rateFeedDescription = relayer.rateFeedDescription();
-    assertEq(rateFeedDescription, "CELO/USD");
+    assertEq(rateFeedDescription, "PLQ/USD");
   }
 
   function test_constructorSetsAggregators() public virtual {

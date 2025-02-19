@@ -2,12 +2,12 @@
 // solhint-disable func-name-mixedcase, var-name-mixedcase, state-visibility, const-name-snakecase, max-states-count
 pragma solidity ^0.8;
 
-import { Test } from "mento-std/Test.sol";
-import { bytes32s, addresses, uints } from "mento-std/Array.sol";
-import { CELO_REGISTRY_ADDRESS } from "mento-std/Constants.sol";
+import { Test } from "test/utils/Test.sol";
+import { bytes32s, addresses, uints } from "contracts/libraries/Array.sol";
+import { PLANQ_REGISTRY_ADDRESS } from "test/utils/Constants.sol";
 
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
-import { IFreezer } from "celo/contracts/common/interfaces/IFreezer.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
+import { IFreezer } from "contracts/interfaces/IFreezer.sol";
 
 import { TestERC20 } from "test/utils/mocks/TestERC20.sol";
 import { USDC } from "test/utils/mocks/USDC.sol";
@@ -50,7 +50,7 @@ contract ProtocolTest is Test, WithRegistry {
   IMedianDeltaBreaker medianDeltaBreaker;
   IValueDeltaBreaker valueDeltaBreaker;
 
-  TestERC20 celoToken;
+  TestERC20 planqToken;
   TestERC20 usdcToken;
   TestERC20 eurocToken;
   IStableTokenV2 cUSDToken;
@@ -58,16 +58,16 @@ contract ProtocolTest is Test, WithRegistry {
   IStableTokenV2 eXOFToken;
   IFreezer freezer;
 
-  address cUSD_CELO_referenceRateFeedID;
-  address cEUR_CELO_referenceRateFeedID;
+  address cUSD_PLANQ_referenceRateFeedID;
+  address cEUR_PLANQ_referenceRateFeedID;
   address cUSD_bridgedUSDC_referenceRateFeedID;
   address cEUR_bridgedUSDC_referenceRateFeedID;
   address cUSD_cEUR_referenceRateFeedID;
   address bridgedEUROC_EUR_referenceRateFeedID;
   address eXOF_bridgedEUROC_referenceRateFeedID;
 
-  bytes32 pair_cUSD_CELO_ID;
-  bytes32 pair_cEUR_CELO_ID;
+  bytes32 pair_cUSD_PLQ_ID;
+  bytes32 pair_cEUR_PLQ_ID;
   bytes32 pair_cUSD_bridgedUSDC_ID;
   bytes32 pair_cEUR_bridgedUSDC_ID;
   bytes32 pair_cUSD_cEUR_ID;
@@ -89,7 +89,7 @@ contract ProtocolTest is Test, WithRegistry {
   function setUp_assets() internal {
     /* ===== Deploy collateral and stable assets ===== */
 
-    celoToken = new TestERC20("Celo", "cGLD");
+    planqToken = new TestERC20("Planq", "cGLD");
     usdcToken = new USDC("bridgedUSDC", "bridgedUSDC");
     eurocToken = new USDC("bridgedEUROC", "bridgedEUROC");
 
@@ -126,7 +126,7 @@ contract ProtocolTest is Test, WithRegistry {
 
     address[] memory assets = new address[](3);
     uint256[] memory assetDailySpendingRatios = new uint256[](3);
-    assets[0] = address(celoToken);
+    assets[0] = address(planqToken);
     assetDailySpendingRatios[0] = 100000000000000000000000;
     assets[1] = address(usdcToken);
     assetDailySpendingRatios[1] = 100000000000000000000000;
@@ -134,7 +134,7 @@ contract ProtocolTest is Test, WithRegistry {
     assetDailySpendingRatios[2] = 100000000000000000000000;
     reserve = IReserve(deployCode("Reserve", abi.encode(true)));
     reserve.initialize(
-      CELO_REGISTRY_ADDRESS,
+      PLANQ_REGISTRY_ADDRESS,
       tobinTaxStalenessThreshold,
       dailySpendingRatio,
       0,
@@ -158,19 +158,19 @@ contract ProtocolTest is Test, WithRegistry {
     sortedOracles = ISortedOracles(deployCode("SortedOracles", abi.encode(true)));
     sortedOracles.initialize(60 * 10);
 
-    cUSD_CELO_referenceRateFeedID = address(cUSDToken);
-    cEUR_CELO_referenceRateFeedID = address(cEURToken);
+    cUSD_PLANQ_referenceRateFeedID = address(cUSDToken);
+    cEUR_PLANQ_referenceRateFeedID = address(cEURToken);
     cUSD_bridgedUSDC_referenceRateFeedID = address(bytes20(keccak256("USD/USDC")));
     cEUR_bridgedUSDC_referenceRateFeedID = address(bytes20(keccak256("EUR/USDC")));
     cUSD_cEUR_referenceRateFeedID = address(bytes20(keccak256("USD/EUR")));
     bridgedEUROC_EUR_referenceRateFeedID = address(bytes20(keccak256("EUROC/EUR")));
     eXOF_bridgedEUROC_referenceRateFeedID = address(bytes20(keccak256("XOF/EUROC")));
 
-    initOracles(cUSD_CELO_referenceRateFeedID, 10);
-    setMedianRate(cUSD_CELO_referenceRateFeedID, 5e23);
+    initOracles(cUSD_PLANQ_referenceRateFeedID, 10);
+    setMedianRate(cUSD_PLANQ_referenceRateFeedID, 5e23);
 
-    initOracles(cEUR_CELO_referenceRateFeedID, 10);
-    setMedianRate(cEUR_CELO_referenceRateFeedID, 5e23);
+    initOracles(cEUR_PLANQ_referenceRateFeedID, 10);
+    setMedianRate(cEUR_PLANQ_referenceRateFeedID, 5e23);
 
     initOracles(cUSD_bridgedUSDC_referenceRateFeedID, 10);
     setMedianRate(cUSD_bridgedUSDC_referenceRateFeedID, 1 * 1e24);
@@ -221,8 +221,8 @@ contract ProtocolTest is Test, WithRegistry {
   function setUp_breakers() internal {
     /* ========== Deploy Breaker Box =============== */
     address[] memory rateFeedIDs = addresses(
-      cUSD_CELO_referenceRateFeedID,
-      cEUR_CELO_referenceRateFeedID,
+      cUSD_PLANQ_referenceRateFeedID,
+      cEUR_PLANQ_referenceRateFeedID,
       cUSD_bridgedUSDC_referenceRateFeedID,
       cEUR_bridgedUSDC_referenceRateFeedID,
       cUSD_cEUR_referenceRateFeedID,
@@ -243,8 +243,8 @@ contract ProtocolTest is Test, WithRegistry {
 
     /* ========== Deploy Median Delta Breaker =============== */
     address[] memory medianDeltaBreakerRateFeedIDs = addresses(
-      cUSD_CELO_referenceRateFeedID,
-      cEUR_CELO_referenceRateFeedID,
+      cUSD_PLANQ_referenceRateFeedID,
+      cEUR_PLANQ_referenceRateFeedID,
       cUSD_bridgedUSDC_referenceRateFeedID,
       cEUR_bridgedUSDC_referenceRateFeedID,
       cUSD_cEUR_referenceRateFeedID
@@ -286,8 +286,8 @@ contract ProtocolTest is Test, WithRegistry {
     breakerBox.addBreaker(address(medianDeltaBreaker), 3);
 
     // enable median delta breakers breakers
-    breakerBox.toggleBreaker(address(medianDeltaBreaker), cUSD_CELO_referenceRateFeedID, true);
-    breakerBox.toggleBreaker(address(medianDeltaBreaker), cEUR_CELO_referenceRateFeedID, true);
+    breakerBox.toggleBreaker(address(medianDeltaBreaker), cUSD_PLANQ_referenceRateFeedID, true);
+    breakerBox.toggleBreaker(address(medianDeltaBreaker), cEUR_PLANQ_referenceRateFeedID, true);
     breakerBox.toggleBreaker(address(medianDeltaBreaker), cUSD_bridgedUSDC_referenceRateFeedID, true);
     breakerBox.toggleBreaker(address(medianDeltaBreaker), cEUR_bridgedUSDC_referenceRateFeedID, true);
     breakerBox.toggleBreaker(address(medianDeltaBreaker), cUSD_cEUR_referenceRateFeedID, true);
@@ -370,31 +370,31 @@ contract ProtocolTest is Test, WithRegistry {
 
     /* ====== Create pairs for all asset combinations ======= */
 
-    IBiPoolManager.PoolExchange memory pair_cUSD_CELO;
-    pair_cUSD_CELO.asset0 = address(cUSDToken);
-    pair_cUSD_CELO.asset1 = address(celoToken);
-    pair_cUSD_CELO.pricingModule = constantProduct;
-    pair_cUSD_CELO.lastBucketUpdate = block.timestamp;
-    pair_cUSD_CELO.config.spread = FixidityLib.newFixedFraction(5, 100);
-    pair_cUSD_CELO.config.referenceRateResetFrequency = 60 * 5;
-    pair_cUSD_CELO.config.minimumReports = 5;
-    pair_cUSD_CELO.config.referenceRateFeedID = cUSD_CELO_referenceRateFeedID;
-    pair_cUSD_CELO.config.stablePoolResetSize = 1e24;
+    IBiPoolManager.PoolExchange memory pair_cUSD_PLANQ;
+    pair_cUSD_PLANQ.asset0 = address(cUSDToken);
+    pair_cUSD_PLANQ.asset1 = address(planqToken);
+    pair_cUSD_PLANQ.pricingModule = constantProduct;
+    pair_cUSD_PLANQ.lastBucketUpdate = block.timestamp;
+    pair_cUSD_PLANQ.config.spread = FixidityLib.newFixedFraction(5, 100);
+    pair_cUSD_PLANQ.config.referenceRateResetFrequency = 60 * 5;
+    pair_cUSD_PLANQ.config.minimumReports = 5;
+    pair_cUSD_PLANQ.config.referenceRateFeedID = cUSD_PLANQ_referenceRateFeedID;
+    pair_cUSD_PLANQ.config.stablePoolResetSize = 1e24;
 
-    pair_cUSD_CELO_ID = biPoolManager.createExchange(pair_cUSD_CELO);
+    pair_cUSD_PLQ_ID = biPoolManager.createExchange(pair_cUSD_PLANQ);
 
-    IBiPoolManager.PoolExchange memory pair_cEUR_CELO;
-    pair_cEUR_CELO.asset0 = address(cEURToken);
-    pair_cEUR_CELO.asset1 = address(celoToken);
-    pair_cEUR_CELO.pricingModule = constantProduct;
-    pair_cEUR_CELO.lastBucketUpdate = block.timestamp;
-    pair_cEUR_CELO.config.spread = FixidityLib.newFixedFraction(5, 100);
-    pair_cEUR_CELO.config.referenceRateResetFrequency = 60 * 5;
-    pair_cEUR_CELO.config.minimumReports = 5;
-    pair_cEUR_CELO.config.referenceRateFeedID = cEUR_CELO_referenceRateFeedID;
-    pair_cEUR_CELO.config.stablePoolResetSize = 1e24;
+    IBiPoolManager.PoolExchange memory pair_cEUR_PLANQ;
+    pair_cEUR_PLANQ.asset0 = address(cEURToken);
+    pair_cEUR_PLANQ.asset1 = address(planqToken);
+    pair_cEUR_PLANQ.pricingModule = constantProduct;
+    pair_cEUR_PLANQ.lastBucketUpdate = block.timestamp;
+    pair_cEUR_PLANQ.config.spread = FixidityLib.newFixedFraction(5, 100);
+    pair_cEUR_PLANQ.config.referenceRateResetFrequency = 60 * 5;
+    pair_cEUR_PLANQ.config.minimumReports = 5;
+    pair_cEUR_PLANQ.config.referenceRateFeedID = cEUR_PLANQ_referenceRateFeedID;
+    pair_cEUR_PLANQ.config.stablePoolResetSize = 1e24;
 
-    pair_cEUR_CELO_ID = biPoolManager.createExchange(pair_cEUR_CELO);
+    pair_cEUR_PLQ_ID = biPoolManager.createExchange(pair_cEUR_PLANQ);
 
     IBiPoolManager.PoolExchange memory pair_cUSD_bridgedUSDC;
     pair_cUSD_bridgedUSDC.asset0 = address(cUSDToken);
@@ -459,8 +459,8 @@ contract ProtocolTest is Test, WithRegistry {
   function setUp_tradingLimits() internal {
     /* ========== Config Trading Limits =============== */
     ITradingLimits.Config memory config = configL0L1LG(100, 10000, 1000, 100000, 1000000);
-    broker.configureTradingLimit(pair_cUSD_CELO_ID, address(cUSDToken), config);
-    broker.configureTradingLimit(pair_cEUR_CELO_ID, address(cEURToken), config);
+    broker.configureTradingLimit(pair_cUSD_PLQ_ID, address(cUSDToken), config);
+    broker.configureTradingLimit(pair_cEUR_PLQ_ID, address(cEURToken), config);
     broker.configureTradingLimit(pair_cUSD_bridgedUSDC_ID, address(usdcToken), config);
     broker.configureTradingLimit(pair_cEUR_bridgedUSDC_ID, address(usdcToken), config);
     broker.configureTradingLimit(pair_cUSD_cEUR_ID, address(cUSDToken), config);

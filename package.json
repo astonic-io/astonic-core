@@ -1,12 +1,12 @@
 {
-  "name": "@mento-protocol/mento-core",
-  "description": "The core smart contracts of the Mento protocol",
+  "name": "@planq-network/astonic-core",
+  "description": "The core smart contracts of the Astonic protocol",
   "author": {
-    "name": "Mento Labs"
+    "name": "Astonic DAO"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mento-protocol/mento-core"
+    "url": "git+https://github.com/planq-network/astonic-core"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
@@ -21,8 +21,8 @@
     "solhint-plugin-prettier": "0.1.0"
   },
   "keywords": [
-    "mento",
-    "celo",
+    "astonic",
+    "planq",
     "solidity"
   ],
   "private": true,
@@ -42,8 +42,5 @@
     "check-contract-sizes": "env FOUNDRY_PROFILE=optimized forge build --sizes --skip \"test/**/*\"",
     "slither": "slither .",
     "todo": "git ls-files -c --exclude-standard | grep -v \"package.json\" | xargs -I {} sh -c 'grep -H -n -i --color \"TODO:\\|FIXME:\" \"{}\" 2>/dev/null || true'"
-  },
-  "dependencies": {
-    "@celo/contracts": "^11.0.0"
   }
 }

@@ -3,9 +3,9 @@ pragma solidity ^0.8;
 
 import { console } from "forge-std/console.sol";
 import { IERC20 } from "contracts/interfaces/IERC20.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { Vm } from "forge-std/Vm.sol";
-import { VM_ADDRESS } from "mento-std/Constants.sol";
+import { VM_ADDRESS } from "test/utils/Constants.sol";
 
 library TokenHelpers {
   Vm internal constant vm = Vm(VM_ADDRESS);

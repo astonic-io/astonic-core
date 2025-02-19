@@ -2,7 +2,7 @@
 pragma solidity ^0.8;
 
 import { console } from "forge-std/console.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 import { IExchangeProvider } from "contracts/interfaces/IExchangeProvider.sol";
 import { IBiPoolManager } from "contracts/interfaces/IBiPoolManager.sol";
@@ -55,9 +55,9 @@ abstract contract ExchangeForkTest is SwapAssertions, CircuitBreakerAssertions, 
       vm.toString(exchangeId)
     );
     for (uint256 i = 0; i < COLLATERAL_ASSETS_COUNT; i++) {
-      address collateralAsset = mentoReserve.collateralAssets(i);
+      address collateralAsset = astonicReserve.collateralAssets(i);
       vm.label(collateralAsset, IERC20(collateralAsset).symbol());
-      mint(collateralAsset, address(mentoReserve), uint256(25_000_000).toSubunits(collateralAsset), true);
+      mint(collateralAsset, address(astonicReserve), uint256(25_000_000).toSubunits(collateralAsset), true);
     }
   }
 

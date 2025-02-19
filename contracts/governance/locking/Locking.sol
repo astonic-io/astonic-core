@@ -15,16 +15,10 @@ import "./interfaces/ILocking.sol";
 contract Locking is ILocking, LockingBase, LockingRelock, LockingVotes {
   using LibBrokenLine for LibBrokenLine.BrokenLine;
 
-  constructor(bool disableInitializers) {
-    if (disableInitializers) {
-      _disableInitializers();
-    }
-  }
-
   /**
    * @notice Initializes the locking contract.
    * @dev Sets up the base locking parameters and initializes ownership and context setup
-   * @param _token Address of the ERC20 that will be locked. (Mento Token)
+   * @param _token Address of the ERC20 that will be locked. (Astonic Token)
    * @param _startingPointWeek Origin week number for the week-based time system
    * @param _minCliffPeriod Minimum cliff period for locks
    * @param _minSlopePeriod Minimum slope period for locks
@@ -156,8 +150,8 @@ contract Locking is ILocking, LockingBase, LockingRelock, LockingVotes {
   }
 
   /**
-   * @notice Returns the current total supply of veMENTO tokens
-   * @return The total supply of veMENTO tokens
+   * @notice Returns the current total supply of veATC tokens
+   * @return The total supply of veATC tokens
    */
   function totalSupply() external view returns (uint256) {
     if (totalSupplyLine.initial.bias == 0) {
@@ -169,9 +163,9 @@ contract Locking is ILocking, LockingBase, LockingRelock, LockingVotes {
   }
 
   /**
-   * @notice Retrieves the veMENTO balance of an account
+   * @notice Retrieves the veATC balance of an account
    * @param account The account to check the balance for
-   * @return The accounts balance of veMENTO tokens
+   * @return The accounts balance of veATC tokens
    */
   function balanceOf(address account) external view returns (uint256) {
     if (accounts[account].balance.initial.bias == 0) {
@@ -186,14 +180,14 @@ contract Locking is ILocking, LockingBase, LockingRelock, LockingVotes {
    * @notice Returns the name of the token
    */
   function name() public view virtual returns (string memory) {
-    return "Mento Vote-Escrow";
+    return "Astonic Vote-Escrow";
   }
 
   /**
    * @notice Returns the symbol of the token
    */
   function symbol() public view virtual returns (string memory) {
-    return "veMENTO";
+    return "veATC";
   }
 
   /**

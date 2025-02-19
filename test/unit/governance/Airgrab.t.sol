@@ -2,8 +2,8 @@
 pragma solidity 0.8.18;
 // solhint-disable func-name-mixedcase, state-visibility, max-states-count, var-name-mixedcase
 
-import { Test } from "mento-std/Test.sol";
-import { bytes32s } from "mento-std/Array.sol";
+import { Test } from "test/utils/Test.sol";
+import { bytes32s } from "contracts/libraries/Array.sol";
 
 import { ECDSA } from "openzeppelin-contracts-next/contracts/utils/cryptography/ECDSA.sol";
 import { ERC20 } from "openzeppelin-contracts-next/contracts/token/ERC20/ERC20.sol";
@@ -38,7 +38,7 @@ contract AirgrabTest is Test {
   Airgrab public airgrab;
   ERC20 public token;
 
-  address payable public mentoTreasury = payable(makeAddr("MentoTreasury"));
+  address payable public astonicTreasury = payable(makeAddr("AstonicTreasury"));
   address public fractalSigner;
   uint256 public fractalSignerPk;
   uint256 public otherSignerPk;
@@ -67,7 +67,7 @@ contract AirgrabTest is Test {
     vm.label(claimer0, "Claimer0");
     vm.label(claimer1, "Claimer1");
 
-    token = new ERC20("Mento Token", "MENTO");
+    token = new ERC20("Astonic Token", "MENTO");
     tokenAddress = address(token);
 
     vm.label(tokenAddress, "MENTO");
@@ -79,15 +79,13 @@ contract AirgrabTest is Test {
   /// @notice Create a new Airgrab, but don't initialize it.
   function newAirgrab() internal {
     airgrab = new Airgrab(
-      merkleRoot,
-      fractalSigner,
-      fractalMaxAge,
       endTimestamp,
       cliffPeriod,
       slopePeriod,
       tokenAddress,
       locking,
-      mentoTreasury
+      address(0x0),
+      astonicTreasury
     );
   }
 
@@ -105,15 +103,15 @@ contract AirgrabTest is Test {
   function test_Constructor_setsAttributes() public {
     c_subject();
 
-    assertEq(airgrab.root(), merkleRoot);
+    /*assertEq(airgrab.root(), merkleRoot);
     assertEq(airgrab.fractalSigner(), fractalSigner);
-    assertEq(airgrab.fractalMaxAge(), fractalMaxAge);
+    assertEq(airgrab.fractalMaxAge(), fractalMaxAge);*/
     assertEq(airgrab.endTimestamp(), endTimestamp);
     assertEq(airgrab.cliffPeriod(), cliffPeriod);
     assertEq(airgrab.slopePeriod(), slopePeriod);
     assertEq(address(airgrab.token()), tokenAddress);
     assertEq(address(airgrab.locking()), locking);
-    assertEq(address(airgrab.mentoTreasury()), mentoTreasury);
+    assertEq(address(airgrab.astonicTreasury()), astonicTreasury);
   }
 
   /// @notice Checks the merke root
@@ -158,10 +156,10 @@ contract AirgrabTest is Test {
     c_subject();
   }
 
-  /// @notice Checks the Mento Treasury address
-  function test_Constructor_whenInvalidMentoTreasury_reverts() public {
-    mentoTreasury = payable(address(0));
-    vm.expectRevert("Airgrab: invalid Mento Treasury");
+  /// @notice Checks the Astonic Treasury address
+  function test_Constructor_whenInvalidAstonicTreasury_reverts() public {
+    astonicTreasury = payable(address(0));
+    vm.expectRevert("Airgrab: invalid Astonic Treasury");
     c_subject();
   }
 
@@ -206,18 +204,18 @@ contract AirgrabTest is Test {
     airgrab.drain(tokenAddress);
   }
 
-  /// @notice Drains all tokens to the Mento Treasury if the airgrab has ended
+  /// @notice Drains all tokens to the Astonic Treasury if the airgrab has ended
   function test_Drain_drains() public d_setUp {
     vm.warp(airgrab.endTimestamp() + 1);
     deal(tokenAddress, address(airgrab), 100e18);
     vm.expectEmit(true, true, true, true);
     emit TokensDrained(tokenAddress, 100e18);
     airgrab.drain(tokenAddress);
-    assertEq(token.balanceOf(mentoTreasury), 100e18);
+    assertEq(token.balanceOf(astonicTreasury), 100e18);
     assertEq(token.balanceOf(address(airgrab)), 0);
   }
 
-  /// @notice Drains all arbitrary tokens to the Mento Treasury fund if the airgrab has ended
+  /// @notice Drains all arbitrary tokens to the Astonic Treasury fund if the airgrab has ended
   function test_Drain_drainsOtherTokens() public d_setUp {
     ERC20 otherToken = new ERC20("Other Token", "OTT");
 
@@ -228,7 +226,7 @@ contract AirgrabTest is Test {
     emit TokensDrained(address(otherToken), 100e18);
     airgrab.drain(address(otherToken));
 
-    assertEq(otherToken.balanceOf(mentoTreasury), 100e18);
+    assertEq(otherToken.balanceOf(astonicTreasury), 100e18);
     assertEq(otherToken.balanceOf(address(airgrab)), 0);
   }
 
@@ -254,15 +252,7 @@ contract AirgrabTest is Test {
   function cl_subject() internal {
     vm.prank(cl_params.account);
     airgrab.claim(
-      cl_params.amount,
-      cl_params.delegate,
-      cl_params.merkleProof,
-      Airgrab.FractalProof(
-        cl_params.fractalProof,
-        cl_params.fractalProofValidUntil,
-        cl_params.fractalProofApprovedAt,
-        cl_params.fractalId
-      )
+      cl_params.delegate
     );
   }
 
@@ -321,7 +311,7 @@ contract AirgrabTest is Test {
   }
 
   /// @notice mock the locking contract to return the provided voting power
-  /// @param lockId The lockId of the veMento lock
+  /// @param lockId The lockId of the veAstonic lock
   function mockLockReturns(uint256 lockId) internal {
     vm.mockCall(locking, abi.encodeWithSelector(ILocking(locking).lock.selector), abi.encode(lockId));
   }

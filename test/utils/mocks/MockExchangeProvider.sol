@@ -2,7 +2,7 @@
 pragma solidity ^0.8;
 
 import { IExchangeProvider } from "contracts/interfaces/IExchangeProvider.sol";
-import { FixidityLib } from "celo/contracts/common/FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 
 contract MockExchangeProvider is IExchangeProvider {
   using FixidityLib for FixidityLib.Fraction;

@@ -3,13 +3,13 @@ pragma solidity 0.8.18;
 // solhint-disable func-name-mixedcase, max-line-length, max-states-count
 
 import { Vm } from "forge-std/Vm.sol";
-import { addresses, uints } from "mento-std/Array.sol";
+import { addresses, uints } from "contracts/libraries/Array.sol";
 
 import { VmExtension } from "test/utils/VmExtension.sol";
 import { GovernanceTest } from "test/unit/governance/GovernanceTest.sol";
 
 import { GovernanceFactory } from "contracts/governance/GovernanceFactory.sol";
-import { MentoToken } from "contracts/governance/MentoToken.sol";
+import { AstonicToken } from "contracts/governance/AstonicToken.sol";
 import { Locking } from "contracts/governance/locking/Locking.sol";
 import { TimelockController } from "contracts/governance/TimelockController.sol";
 
@@ -22,13 +22,13 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
 
   GovernanceFactory public factory;
 
-  MentoToken public mentoToken;
+  AstonicToken public astonicToken;
   TimelockController public governanceTimelock;
   Locking public locking;
 
-  address public celoGovernance = makeAddr("CeloGovernance");
+  address public planqGovernance = makeAddr("PlanqGovernance");
   address public watchdogMultisig = makeAddr("WatchdogMultisig");
-  address public mentoLabsMultisig = makeAddr("MentoLabsMultisig");
+  address public astonicLabsMultisig = makeAddr("AstonicLabsMultisig");
   address public fractalSigner = makeAddr("FractalSigner");
 
   bytes32 public merkleRoot = bytes32("MockMerkleRoot");
@@ -38,24 +38,24 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
     vm.warp(1697025601); // (Oct-11-2023 WED 12:00:01 PM +UTC)
 
     vm.prank(owner);
-    factory = new GovernanceFactory(celoGovernance);
+    factory = new GovernanceFactory(planqGovernance);
 
-    GovernanceFactory.MentoTokenAllocationParams memory allocationParams = GovernanceFactory
-      .MentoTokenAllocationParams({
+    GovernanceFactory.AstonicTokenAllocationParams memory allocationParams = GovernanceFactory
+      .AstonicTokenAllocationParams({
         airgrabAllocation: 50,
-        mentoTreasuryAllocation: 100,
-        additionalAllocationRecipients: addresses(address(mentoLabsMultisig)),
+        astonicTreasuryAllocation: 100,
+        additionalAllocationRecipients: addresses(address(astonicLabsMultisig)),
         additionalAllocationAmounts: uints(200)
       });
 
-    vm.prank(celoGovernance);
-    factory.createGovernance(watchdogMultisig, merkleRoot, fractalSigner, allocationParams);
-    mentoToken = factory.mentoToken();
+    vm.prank(planqGovernance);
+    factory.createGovernance(watchdogMultisig, allocationParams);
+    astonicToken = factory.astonicToken();
     governanceTimelock = factory.governanceTimelock();
     locking = factory.locking();
 
     vm.prank(alice);
-    mentoToken.approve(address(locking), type(uint256).max);
+    astonicToken.approve(address(locking), type(uint256).max);
   }
 
   /**
@@ -67,7 +67,7 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
     uint32 cliff,
     uint96 period
   ) public {
-    amount = uint96(bound(amount, 1e18, mentoToken.balanceOf(address(governanceTimelock))));
+    amount = uint96(bound(amount, 1e18, astonicToken.balanceOf(address(governanceTimelock))));
     vm.assume(slope >= locking.minSlopePeriod());
     vm.assume(slope <= 104);
     vm.assume(cliff >= locking.minCliffPeriod());
@@ -75,7 +75,7 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
     vm.assume(period <= 208); // 4 years
 
     vm.prank(address(governanceTimelock));
-    mentoToken.transfer(alice, amount);
+    astonicToken.transfer(alice, amount);
 
     vm.prank(alice);
     locking.lock(alice, alice, amount, slope, cliff);
@@ -84,12 +84,12 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
 
     vm.timeTravel(BLOCKS_WEEK * period);
 
-    uint256 balanceBefore = mentoToken.balanceOf(alice);
+    uint256 balanceBefore = astonicToken.balanceOf(alice);
 
     vm.prank(alice);
     locking.withdraw();
 
-    uint256 balanceAfter = mentoToken.balanceOf(alice);
+    uint256 balanceAfter = astonicToken.balanceOf(alice);
 
     if (period > cliff) {
       assert(balanceAfter > balanceBefore);
@@ -113,7 +113,7 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
     uint32 cliff,
     uint96 period
   ) public {
-    amount = uint96(bound(amount, 1e18, mentoToken.balanceOf(address(governanceTimelock))));
+    amount = uint96(bound(amount, 1e18, astonicToken.balanceOf(address(governanceTimelock))));
     vm.assume(slope >= locking.minSlopePeriod());
     vm.assume(slope <= 104);
     vm.assume(cliff >= locking.minCliffPeriod());
@@ -121,7 +121,7 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
     vm.assume(period <= 2080); // 40 years
 
     vm.prank(address(governanceTimelock));
-    mentoToken.transfer(alice, amount);
+    astonicToken.transfer(alice, amount);
 
     vm.prank(alice);
     locking.lock(alice, alice, amount, slope, cliff);
@@ -130,12 +130,12 @@ contract FuzzLockingIntegrationTest is GovernanceTest {
 
     vm.timeTravel(BLOCKS_WEEK * period);
 
-    uint256 balanceBefore = mentoToken.balanceOf(alice);
+    uint256 balanceBefore = astonicToken.balanceOf(alice);
 
     vm.prank(alice);
     locking.withdraw();
 
-    uint256 balanceAfter = mentoToken.balanceOf(alice);
+    uint256 balanceAfter = astonicToken.balanceOf(alice);
 
     if (period > cliff) {
       assert(balanceAfter > balanceBefore);
