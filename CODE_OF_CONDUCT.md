@@ -1,15 +1,15 @@
 ---
-title: Mento Community Code of Conduct
-description: The Mento Code of Conduct is one of the ways we bring our value of decentralization into practice.
+title: Astonic Community Code of Conduct
+description: The Astonic Code of Conduct is one of the ways we bring our value of decentralization into practice.
 ---
 
 ### 1. Purpose
 
-The Mento Code of Conduct is one of the ways we bring our value of decentralization into practice. A primary goal of the Mento community is to be welcoming and inclusive to the largest number of contributors, with the most varied and diverse backgrounds possible.
+The Astonic Code of Conduct is one of the ways we bring our value of decentralization into practice. A primary goal of the Astonic community is to be welcoming and inclusive to the largest number of contributors, with the most varied and diverse backgrounds possible.
 
 As such, we are committed to providing a friendly, safe and welcoming environment for all, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-We invite all those who participate in the Mento community to help us create safe and positive experiences for everyone.
+We invite all those who participate in the Astonic community to help us create safe and positive experiences for everyone.
 
 ### 2. Open Source Citizenship
 
@@ -19,7 +19,7 @@ Communities mirror the societies in which they exist and positive action is esse
 
 ### 3. Scope
 
-We expect all community participants (users; partners; arbitrageurs; contributors–paid or otherwise; investors; Mento Labs employees; and others) to abide by this Code of Conduct in all community undertakings and venues–online and in-person–as well as in all one-on-one communications pertaining to community business.
+We expect all community participants (users; partners; arbitrageurs; contributors–paid or otherwise; investors; Astonic maintainers; and others) to abide by this Code of Conduct in all community undertakings and venues–online and in-person–as well as in all one-on-one communications pertaining to community business.
 
 This Code of Conduct and its related procedures also apply to unacceptable behavior occurring outside the scope of community activities when such behavior has the potential to adversely affect the safety and well-being of community members.
 
@@ -34,7 +34,7 @@ Remember that community event venues may be shared with members of the public; p
 
 ### 5. Unacceptable Behavior
 
-The following behaviors are considered harassment and are unacceptable within the Mento community. Please note that this is not a comprehensive list, and in general, anything which could reasonably be considered inappropriate in a professional setting is unacceptable.
+The following behaviors are considered harassment and are unacceptable within the Astonic community. Please note that this is not a comprehensive list, and in general, anything which could reasonably be considered inappropriate in a professional setting is unacceptable.
 
 - Violence, threats of violence, or violent language directed against another person.
 - Hurtful or harmful language related to:
@@ -75,7 +75,7 @@ Unacceptable behavior from any community member, including sponsors and those wi
 
 Anyone asked to stop unacceptable behavior is expected to comply immediately. Violation of this Code of Conduct can result in you being asked to leave an event or online space, either temporarily or for the duration of the event (without refund in the case of a paid event), or being banned from participation in spaces, or future events and activities in perpetuity.
 
-Mento community members are held accountable, in addition to these guidelines, to their respective employment Anti-Harassment/Discrimination Policies. Where applicable, any such staff in violation of this Code of Conduct may be subject to further consequences, such as disciplinary action, up to and including termination of employment. For Mento community contractors or vendors, violation of this Code of Conduct could affect the continuation or renewal of a contract.
+Astonic community members are held accountable, in addition to these guidelines, to their respective employment Anti-Harassment/Discrimination Policies. Where applicable, any such staff in violation of this Code of Conduct may be subject to further consequences, such as disciplinary action, up to and including termination of employment. For Astonic community contractors or vendors, violation of this Code of Conduct could affect the continuation or renewal of a contract.
 
 ### 7. License and attribution
 
@@ -83,6 +83,6 @@ This Code of Conduct is distributed under a [Creative Commons Attribution-ShareA
 
 ### 8. Modifications
 
-The Mento community may amend this Code of Conduct from time to time and may also vary the procedures it sets out where appropriate in a particular case. Your agreement to comply with the guidelines will be deemed agreement to any changes to it.
+The Astonic community may amend this Code of Conduct from time to time and may also vary the procedures it sets out where appropriate in a particular case. Your agreement to comply with the guidelines will be deemed agreement to any changes to it.
 
 _Last updated on the 2th of December 2022_

@@ -1,6 +1,6 @@
-# Contributing to Mento Core
+# Contributing to Astonic Core
 
-The following is a set of guidelines for contributing to the Mento protocol. Reading and following the guidelines will help make the contribution process easy and allow us to maintain a consistent standard of code & quality.
+The following is a set of guidelines for contributing to the Astonic protocol. Reading and following the guidelines will help make the contribution process easy and allow us to maintain a consistent standard of code & quality.
 
 ## Quick Links
 
@@ -16,10 +16,10 @@ The following is a set of guidelines for contributing to the Mento protocol. Rea
 
 ## How To Contribute
 
-There are many ways you can contribute to the development of Mento. Contributions can be made to this repo via issues and pull requests. However, before contributing, you should have a good understanding of how Mento is intended to work and the different components that make up the core protocol. You can learn more about Mento by taking some time to read the following:
+There are many ways you can contribute to the development of Astonic. Contributions can be made to this repo via issues and pull requests. However, before contributing, you should have a good understanding of how Astonic is intended to work and the different components that make up the core protocol. You can learn more about Astonic by taking some time to read the following:
 
-- [Protocol Documentation](https://docs.mento.org/planq-network/core/overview)
-- [Stability Whitepaper](https://celo.org/papers/stability)
+- [Protocol Documentation](https://astonic.gitbook.io/astonic-docs)
+- [Stability Framework](https://astonic.gitbook.io/astonic-docs/astonic-protocol-concepts/core-stability-framework)
 
 ### Reporting Bugs
 
@@ -27,7 +27,7 @@ Before making a bug report, check the list of open issues, as you may find that 
 
 ### Suggesting Features
 
-You can contribute to the development of Mento by suggesting new features to be built or enhancements to existing functionality. Before proposing a feature, check that an issue does not already exist for the feature or enhancement. To suggest a feature or enhancement, create a new issue and select the feature request template. Once your issue has been created, it's best to start a discussion in the Mento [discord server](http://chat.mento.org) referencing the issue.
+You can contribute to the development of Astonic by suggesting new features to be built or enhancements to existing functionality. Before proposing a feature, check that an issue does not already exist for the feature or enhancement. To suggest a feature or enhancement, create a new issue and select the feature request template. Once your issue has been created, it's best to start a discussion in the Astonic [telegram channel](https://t.me/astonic_io) referencing the issue.
 
 ### Code Contributions
 

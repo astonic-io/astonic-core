@@ -6,6 +6,7 @@
 # Astonic Core
 
 This repo contains the source code of the core smart contracts for the Astonic protocol. The repository is built with foundry which is used for the compilation and testing of the smart contracts.
+It is a fork of [Mento](https://github.com/mento-protocol).
 
 ## What is Astonic?
 
