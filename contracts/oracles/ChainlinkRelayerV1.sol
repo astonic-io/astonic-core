@@ -11,7 +11,7 @@ import { UD60x18, ud, intoUint256 } from "prb/math/UD60x18.sol";
  * relayer.
  * @dev SortedOracles is a Solidity 5.13 contract, thus we can't import the
  * interface directly, so we use a minimal hand-copied one.
- * See https://github.com/planq-network/astonic-core/blob/develop/contracts/common/SortedOracles.sol
+ * See https://github.com/astonic-io/astonic-core/blob/develop/contracts/common/SortedOracles.sol
  */
 interface ISortedOraclesMin {
   function report(address rateFeedId, uint256 value, address lesserKey, address greaterKey) external;

@@ -26,7 +26,7 @@ contract GovernanceFactoryTest is GovernanceTest {
 
   // If we started at block 0, Locking.getWeek() would return 0 and
   // the following line would revert with an underflow:
-  // https://github.com/planq-network/astonic-core/blob/2075c83f3b90465f988195dd746c9992614001bc/contracts/governance/GovernanceFactory.sol#L201
+  // https://github.com/astonic-io/astonic-core/blob/2075c83f3b90465f988195dd746c9992614001bc/contracts/governance/GovernanceFactory.sol#L201
   function setUp() public {
     skip(30 days);
     vm.roll(30 * BLOCKS_DAY);

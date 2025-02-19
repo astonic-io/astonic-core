@@ -1,12 +1,12 @@
 {
-  "name": "@planq-network/astonic-core",
+  "name": "@astonic-io/astonic-core",
   "description": "The core smart contracts of the Astonic protocol",
   "author": {
     "name": "Astonic DAO"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/planq-network/astonic-core"
+    "url": "git+https://github.com/astonic-io/astonic-core"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",

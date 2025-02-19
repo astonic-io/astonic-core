@@ -10,7 +10,7 @@ import { IStableTokenV2 } from "./IStableTokenV2.sol";
  * are deprecating the old initialize function in favor of the new one.
  * Keeping this interface for backwards compatibility, in fork tests,
  * because in practice we will never be able to call this function again, anyway.
- * More details: https://github.com/planq-network/astonic-core/pull/502
+ * More details: https://github.com/astonic-io/astonic-core/pull/502
  */
 interface IStableTokenV2DeprecatedInit is IStableTokenV2 {
   function initialize(

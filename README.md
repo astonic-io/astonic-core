@@ -21,7 +21,7 @@ The Astonic protocol is a smart contract platform built on the Planq blockchain 
 
 ```bash
 # Get the latest code
-git clone git@github.com:planq-network/astonic-core.git
+git clone git@github.com:astonic-io/astonic-core.git
 
 # Change directory to the the newly cloned repo
 cd astonic-core
@@ -63,7 +63,7 @@ slither . --foundry-ignore-compile --triage-mode
 
 For triage mode, in which you can choose to ignore warnings which are added to `slither.db.json`.
 
-[ci-link]: https://github.com/planq-network/astonic-core/actions/workflows/ci.yml
-[ci-badge]: https://github.com/planq-network/astonic-core/actions/workflows/ci.yml/badge.svg
+[ci-link]: https://github.com/astonic-io/astonic-core/actions/workflows/ci.yml
+[ci-badge]: https://github.com/astonic-io/astonic-core/actions/workflows/ci.yml/badge.svg
 [foundry]: https://getfoundry.sh/
 [foundry-badge]: https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg
