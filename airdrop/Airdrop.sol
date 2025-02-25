@@ -25,8 +25,8 @@ contract AirdropVerifier {
     address private owner;
     address private airgrabAddress;
 
-    address public constant secp256k1CurveAddress;
-    CurveInterface secp256k1Curve;
+    address public constant secp256k1CurveAddress = 0x8BEc0DA4664Be7C399720F52438Ac2c83650a1A0;
+    CurveInterface secp256k1Curve = CurveInterface(secp256k1CurveAddress);
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -38,14 +38,13 @@ contract AirdropVerifier {
         _;
     }
 
-    constructor(address[] memory eligibleAddresses, uint256[] memory amounts, address memory secp256k1CurveAddress_) public {
+    constructor(address[] memory eligibleAddresses, uint256[] memory amounts) public {
         require(eligibleAddresses.length == amounts.length);
         for (uint256 i = 0; i < eligibleAddresses.length; i++) {
             airdropAmount[eligibleAddresses[i]] = amounts[i];
         }
         owner = msg.sender;
-        secp256k1CurveAddress = secp256k1CurveAddress_;
-        secp256k1Curve = CurveInterface(secp256k1CurveAddress);
+
     }
 
     function setAirgrabAddress(address _airgrabAddress) public onlyOwner {
