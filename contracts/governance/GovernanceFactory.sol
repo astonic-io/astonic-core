@@ -78,7 +78,6 @@ contract GovernanceFactory is Ownable {
   uint32 public constant AIRGRAB_LOCK_SLOPE = 104; // Slope duration for the airgrabbed tokens in weeks
   uint32 public constant AIRGRAB_LOCK_CLIFF = 0; // Cliff duration for the airgrabbed tokens in weeks
   uint256 public constant AIRGRAB_DURATION = 26 weeks;
-  uint256 public constant FRACTAL_MAX_AGE = 180 days; // Maximum age of the kyc for the airgrab
   uint256 public airgrabEnds;
 
   // Governance Timelock configuration
@@ -219,7 +218,7 @@ contract GovernanceFactory is Ownable {
         AIRGRAB_LOCK_SLOPE,
         addr.astonicToken,
         addr.locking,
-        address(0x0),
+        address(0x5a0838822Aafd81EA0Ea526B97acb55fB5713664),
         payable(addr.governanceTimelock)
       );
     assert(address(airgrab) == addr.airgrab);
