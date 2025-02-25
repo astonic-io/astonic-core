@@ -52,7 +52,7 @@ contract AstonicToken is Ownable, Pausable, ERC20Burnable {
     locking = locking_;
     emission = emission_;
 
-    uint256 supply = 1_000_000_000 * 10 ** decimals();
+    uint256 supply = 500_000_000 * 10 ** decimals();
 
     // slither-disable-next-line uninitialized-local
     uint256 totalAllocated;
