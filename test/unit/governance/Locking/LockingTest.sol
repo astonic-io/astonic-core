@@ -15,7 +15,7 @@ contract LockingTest is GovernanceTest {
 
   function setUp() public virtual {
     astonicToken = new MockAstonicToken();
-    locking = new LockingHarness();
+    locking = new LockingHarness(true);
 
     vm.prank(owner);
     locking.__Locking_init(IERC20Upgradeable(address(astonicToken)), 0, 0, 0);

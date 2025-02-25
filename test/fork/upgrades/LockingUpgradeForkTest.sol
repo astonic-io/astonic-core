@@ -56,7 +56,7 @@ contract LockingUpgradeForkTest is BaseForkTest {
     astonicGovernor = governanceFactory.astonicGovernor();
     astonicToken = governanceFactory.astonicToken();
 
-    newLockingImplementation = address(new Locking());
+    newLockingImplementation = address(new Locking(true));
     vm.prank(timelockController);
     proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(locking)), newLockingImplementation);
 
