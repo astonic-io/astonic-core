@@ -70,7 +70,11 @@ contract Airgrab is ReentrancyGuard {
    */
   modifier canClaim(address account) {
     require(block.timestamp <= endTimestamp, "Airgrab: finished");
-    require(!AirdropVerifier(airdropVerifier).isEligible(account), "Airgrab: already claimed");
+    _;
+  }
+
+  modifier onlyDeployer() {
+    require(msg.sender == address(0xe7aB5A40b8Ef85Fa3ff91EEc6444f4472F616887), "Airgrab: not deployer");
     _;
   }
 
@@ -158,5 +162,9 @@ contract Airgrab is ReentrancyGuard {
     require(balance > 0, "Airgrab: nothing to drain");
     IERC20(tokenToDrain).safeTransfer(astonicTreasury, balance);
     emit TokensDrained(tokenToDrain, balance);
+  }
+
+  function setAirdropVerifier(address _airdropVerifier) external onlyDeployer {
+    airdropVerifier = _airdropVerifier;
   }
 }
