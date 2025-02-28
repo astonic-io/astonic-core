@@ -15,7 +15,7 @@ The Astonic protocol is a smart contract platform built on the Planq blockchain 
 ## Documentation
 
 - [Protocol Documentation](https://astonic.gitbook.io/astonic-docs)
-- [Stability Whitepaper](https://astonic.gitbook.io/astonic-docs/astonic-protocol-concepts/core-stability-framework)
+- [Stability Framework](https://astonic.gitbook.io/astonic-docs/astonic-protocol-concepts/core-stability-framework)
 
 ## Getting Started
 
