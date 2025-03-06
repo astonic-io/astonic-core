@@ -16,7 +16,7 @@ gas_limit = 9223372036854775807
 
 allow_paths = ["node_modules/@celo"]
 
-fs_permissions = [{ access = "read", path = "out" }]
+fs_permissions = [{ access = "read", path = "out" }, { access = "read", path = "data" }, { access = "read", path = "broadcast" }, { access = "read", path = "script/upgrades/" } ]
 
 [profile.ci]
 fuzz_runs = 1_000
@@ -31,5 +31,5 @@ no_match_contract = "_random" # in order to reset the no_match_contract
 match_contract = "ForkTest"
 
 [rpc_endpoints]
-celo = "${CELO_MAINNET_RPC_URL}"
+planq = "${PLANQ_MAINNET_RPC_URL}"
 alfajores = "${ALFAJORES_RPC_URL}"
