@@ -113,7 +113,7 @@ contract AirdropVerifier {
             }
 
             bytes32 resultEvenSha256 = sha256(resultEven);
-            ripemdAddr = ripemd160(sha256(resultEvenSha256));
+            ripemdAddr = ripemd160(resultEvenSha256);
         } else {
             bytes memory resultOdd = new bytes(33);
             resultOdd[0] = 0x03;
