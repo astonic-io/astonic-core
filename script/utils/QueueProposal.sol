@@ -5,7 +5,7 @@ import { Script } from "./Script.sol";
 import { IGovernanceFactory } from "../../interfaces/IGovernanceFactory.sol";
 import { IGovernor } from "../../interfaces/IGovernor.sol";
 import { console2 } from "forge-std/Script.sol";
-import { Chain } from "./Chain.sol";
+import { PlanqChain } from "./Chain.sol";
 
 contract QueueProposal is Script {
     function run(uint256 proposalId) public {
