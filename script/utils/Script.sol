@@ -2,7 +2,7 @@
 pragma solidity ^0.8;
 
 import { Script as BaseScript } from "forge-std/Script.sol";
-import { FixidityLib } from "./FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { PlanqChain } from "./Chain.sol";
 import { Contracts } from "./Contracts.sol";
 import { Factory } from "./Factory.sol";

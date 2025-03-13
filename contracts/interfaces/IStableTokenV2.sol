@@ -95,4 +95,6 @@ interface IStableTokenV2 {
     uint256 gatewayFee,
     uint256 baseTxFee
   ) external;
+
+  function setBroker(address _broker) external;
 }

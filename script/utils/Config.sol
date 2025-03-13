@@ -3,7 +3,7 @@
 pragma solidity >=0.5.13 <0.9.0;
 pragma experimental ABIEncoderV2;
 
-import { FixidityLib } from "./FixidityLib.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
 import { console2 as console } from "forge-std/Script.sol";
 
 import { PlanqChain } from "script/utils/Chain.sol";
