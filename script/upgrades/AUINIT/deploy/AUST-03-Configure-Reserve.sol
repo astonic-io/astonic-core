@@ -1,0 +1,104 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+pragma solidity ^0.8;
+
+import { Arrays } from "script/utils/Arrays.sol";
+import { Contracts } from "script/utils/Contracts.sol";
+import { IRegistry } from "contracts/interfaces/IRegistry.sol";
+import { IReserve } from "contracts/interfaces/IReserve.sol";
+import { IBiPoolManager } from "contracts/interfaces/IBiPoolManager.sol";
+import { IBreakerBox } from "contracts/interfaces/IBreakerBox.sol";
+import { FixidityLib } from "contracts/libraries/FixidityLib.sol";
+import { IBroker } from "contracts/interfaces/IBroker.sol";
+import { IPricingModule } from "contracts/interfaces/IPricingModule.sol";
+import { IERC20Metadata } from "contracts/interfaces/IERC20Metadata.sol";
+import { IStableTokenV2 } from "contracts/interfaces/IStableTokenV2.sol";
+import { IMedianDeltaBreaker } from "contracts/interfaces/IMedianDeltaBreaker.sol";
+import { IValueDeltaBreaker } from "contracts/interfaces/IValueDeltaBreaker.sol";
+import { IProxy } from "contracts/interfaces/IProxy.sol";
+import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
+import { ISortedOracles } from "contracts/interfaces/ISortedOracles.sol";
+import { PlanqChain } from "script/utils/Chain.sol";
+import { Script } from "script/utils/Script.sol";
+import { console2 } from "forge-std/Script.sol";
+import {Config} from "script/utils/Config.sol";
+
+contract AUST03_CreateContracts is Script {
+    using Contracts for Contracts.Cache;
+    using FixidityLib for FixidityLib.Fraction;
+
+    IRegistry private registry = IRegistry(0x9DabFe01de024C681320eb80FBc64EccEaa58ca2);
+
+
+    address sortedOracles = registry.getAddressForString("SortedOracles");
+
+
+    function run() public {
+        address biPoolManagerProxy = address(0x6257f6315Ae36eB88AdD2eB4F886a0A4261Ae1B1);
+        address brokerProxy = address(0xaD7e1F70f4C9cdbe41516188433dc3Da9A7d1187);
+        address reserveProxy = address(0xBc51eCE1F7c7C0c351d413e8162bBA6C9e28A9f6);
+        address stableTokenProxy = address(0xA2871B267a7d888F830251F6B4D9d3DFf184995a);
+        address stableTokenEURProxy = address(0xd5be2932FEbD73019ba1d5d97DFC35E1Ab09E501);
+        address stableTokenBRLProxy = address(0x240642C6f69878A0b199065f25EDf82023BC59ce);
+        address stableToken = address(0xD23Fd338aBA28C1865d77816dE0Ba7482879fC60);
+        address breakerBox = address(0x26039b9a3d73184f212f8A4622230a953EE9e51E);
+        address biPoolManager = address(0xAa74B934372F770B0975617Bdc5E1CE82eFC84Ad);
+        address broker = address(0xb822599237cd7536439523Ae660Dd163De97fC74);
+        address reserve = address(0x36D70b7e17e415F854E453E66383944710Ce04cc);
+        address medianDeltaBreaker = address(0x7C2e9Cae119a626036ea7A7A685C9F06BAF65a7B);
+        address valueDeltaBreaker = address(0xE0f746b2bb523164f3Ae4f88Ed687B78761A4d6A);
+
+        vm.startBroadcast(PlanqChain.deployerPrivateKey());
+        {
+            IProxy(reserveProxy)._setAndInitializeImplementation(
+                reserve,
+
+                    reserveInitCalldata()
+
+            );
+
+            IReserve(reserveProxy).addExchangeSpender(brokerProxy);
+            IReserve(reserveProxy).addExchangeSpender(0x268C754bb4Ee50dCa0aF1E81e6B3eDA3c8Be93db);
+            IReserve(reserveProxy).addToken(stableTokenProxy);
+            IReserve(reserveProxy).addToken(stableTokenEURProxy);
+            IReserve(reserveProxy).addToken(stableTokenBRLProxy);
+        }
+        vm.stopBroadcast();
+
+    }
+
+    function reserveInitCalldata() internal view returns (bytes memory) {
+        Config.PartialReserve memory  partialReserve;
+
+        partialReserve.registryAddress = address(0x9DabFe01de024C681320eb80FBc64EccEaa58ca2);
+        partialReserve.tobinTaxStalenessThreshold = 3153600000;
+        partialReserve.assetAllocationSymbols = Arrays.bytes32s(
+        bytes32("PLQ")
+        );
+        partialReserve.assetAllocationWeights = Arrays.uints(
+        uint256(1 * 10 ** 24)
+        );
+        partialReserve.tobinTax = FixidityLib.newFixed(0).unwrap();
+        partialReserve.tobinTaxReserveRatio = FixidityLib.newFixed(0).unwrap();
+        partialReserve.frozenPlanq = 0;
+        partialReserve.frozenDays = 0;
+        partialReserve.spendingRatioForPlanq = FixidityLib.fixed1().unwrap();
+
+        partialReserve.collateralAssets = Arrays.addresses(registry.getAddressForString("BridgedUSDC"), registry.getAddressForString("PlanqToken"));
+        partialReserve.collateralAssetDailySpendingRatios = Arrays.uints(FixidityLib.fixed1().unwrap(), FixidityLib.fixed1().unwrap());
+
+        return abi.encodeWithSelector(
+            IReserve(0x36D70b7e17e415F854E453E66383944710Ce04cc).initialize.selector,
+            partialReserve.registryAddress,
+            partialReserve.tobinTaxStalenessThreshold,
+            partialReserve.spendingRatioForPlanq,
+            partialReserve.frozenPlanq,
+            partialReserve.frozenDays,
+            partialReserve.assetAllocationSymbols,
+            partialReserve.assetAllocationWeights,
+            partialReserve.tobinTax,
+            partialReserve.tobinTaxReserveRatio,
+            partialReserve.collateralAssets,
+            partialReserve.collateralAssetDailySpendingRatios
+        );
+    }
+}

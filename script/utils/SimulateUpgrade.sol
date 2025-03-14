@@ -2,12 +2,12 @@
 // solhint-disable func-name-mixedcase, contract-name-camelcase
 pragma solidity ^0.8;
 
-import { console } from "forge-std-next/console.sol";
+import { console } from "forge-std/console.sol";
 import { Contracts } from "script/utils/Contracts.sol";
 import { IAstonicUpgrade } from "script/interfaces/IAstonicUpgrade.sol";
 import { IGovernanceFactory } from "script/interfaces/IGovernanceFactory.sol";
 import { GovernanceScript } from "script/utils/Script.sol";
-import { Chain } from "script/utils/Chain.sol";
+import { PlanqChain } from "script/utils/Chain.sol";
 
 interface IScript {
     function run() external;
@@ -19,7 +19,7 @@ contract SimulateUpgrade is GovernanceScript {
     function run(string memory _upgrade) public {
         fork();
 
-        address governance = IGovernanceFactory(Chain.governanceFactory()).governanceTimelock();
+        address governance = IGovernanceFactory(PlanqChain.governanceFactory()).governanceTimelock();
         IAstonicUpgrade upgrade = IAstonicUpgrade(factory.create(_upgrade));
         upgrade.prepare();
 

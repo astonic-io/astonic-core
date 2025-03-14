@@ -42,107 +42,16 @@ contract AUST03_CreateContracts is Script {
     function run() public {
         address biPoolManagerProxy = address(0x6257f6315Ae36eB88AdD2eB4F886a0A4261Ae1B1);
         address brokerProxy = address(0xaD7e1F70f4C9cdbe41516188433dc3Da9A7d1187);
-        address reserveProxy = address(0xBc51eCE1F7c7C0c351d413e8162bBA6C9e28A9f6);
-        address stableTokenProxy = address(0xA2871B267a7d888F830251F6B4D9d3DFf184995a);
-        address stableTokenEURProxy = address(0xd5be2932FEbD73019ba1d5d97DFC35E1Ab09E501);
-        address stableTokenBRLProxy = address(0x240642C6f69878A0b199065f25EDf82023BC59ce);
         address csPricingModule = address(0xb617E4D55c5da46c0BA3Dc3b169F2ce0dDbd829A);
         address cpPricingModule = address(0xe3b595bD30264D1895fA6114Bb0321Ede163DF5e);
-        address stableToken = address(0xD23Fd338aBA28C1865d77816dE0Ba7482879fC60);
         address breakerBox = address(0x26039b9a3d73184f212f8A4622230a953EE9e51E);
         address biPoolManager = address(0xAa74B934372F770B0975617Bdc5E1CE82eFC84Ad);
         address broker = address(0xb822599237cd7536439523Ae660Dd163De97fC74);
-        address reserve = address(0x36D70b7e17e415F854E453E66383944710Ce04cc);
         address medianDeltaBreaker = address(0x7C2e9Cae119a626036ea7A7A685C9F06BAF65a7B);
         address valueDeltaBreaker = address(0xE0f746b2bb523164f3Ae4f88Ed687B78761A4d6A);
 
         vm.startBroadcast(PlanqChain.deployerPrivateKey());
         {
-            registry.setAddressFor("StableToken", stableTokenProxy);
-            registry.setAddressFor("StableTokenEUR", stableTokenEURProxy);
-            registry.setAddressFor("StableTokenBRL", stableTokenBRLProxy);
-            registry.setAddressFor("Reserve", reserveProxy);
-            registry.setAddressFor("Broker", brokerProxy);
-            registry.setAddressFor("BreakerBox", breakerBox);
-            registry.setAddressFor("BridgedUSDC", address(0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265));
-
-            //"PLQUSDRateFeedAddr": "0x8c86e877e9632cD18a66E8A787f93FB3DE56446c",
-            //"PLQEURRateFeedAddr": "0x09535BA317c53caF13fDB6bCAe157E7aBaa894a5",
-            //"PLQBRLRateFeedAddr": "0x5bb8157db521739C3294433B6cD71A46630320fd",
-            //"USDCUSDRateFeedAddr": "0xA1A8003936862E7a15092A91898D69fa8bCE290c",
-            //"USDCEURRateFeedAddr": "0x206B25Ea01E188Ee243131aFdE526bA6E131a016",
-            //"USDCBRLRateFeedAddr": "0x25F21A1f97607Edf6852339fad709728cffb9a9d",
-
-            IBreakerBox(breakerBox).addRateFeeds(
-                    Arrays.addresses(
-                        0x8c86e877e9632cD18a66E8A787f93FB3DE56446c,
-                        0x09535BA317c53caF13fDB6bCAe157E7aBaa894a5,
-                        0x5bb8157db521739C3294433B6cD71A46630320fd,
-                        0xA1A8003936862E7a15092A91898D69fa8bCE290c,
-                        0x206B25Ea01E188Ee243131aFdE526bA6E131a016,
-                        0x25F21A1f97607Edf6852339fad709728cffb9a9d
-                    ));
-
-            IBreakerBox(breakerBox).setSortedOracles(ISortedOracles(sortedOracles));
-
-            IProxy(biPoolManagerProxy)._setAndInitializeImplementation(
-                biPoolManager,
-                abi.encodeWithSelector(
-                    IBiPoolManager(biPoolManager).initialize.selector,
-                    brokerProxy,
-                    IReserve(reserveProxy),
-                    ISortedOracles(sortedOracles),
-                    IBreakerBox(breakerBox)
-                )
-            );
-
-            IProxy(brokerProxy)._setAndInitializeImplementation(
-                broker,
-                abi.encodeWithSelector(
-                    IBroker(broker).initialize.selector,
-                    Arrays.addresses(biPoolManagerProxy),
-                    reserveProxy
-                )
-            );
-
-            IProxy(reserveProxy)._setAndInitializeImplementation(
-                reserve,
-                abi.encodeWithSelector(
-                    IReserve(reserve).initialize.selector,
-                    reserveInitCalldata()
-                )
-            );
-            address[] memory initialBalanceAddresses = new address[](0);
-            uint256[] memory initialBalanceValues = new uint256[](0);
-            IStableTokenV2(stableTokenProxy).initialize(
-                "Astonic USD",
-            "aUSD",
-                initialBalanceAddresses,
-                initialBalanceValues
-            );
-            IStableTokenV2(stableTokenEURProxy).initialize(
-                "Astonic EUR",
-            "aEUR",
-                initialBalanceAddresses,
-                initialBalanceValues
-            );
-            IStableTokenV2(stableTokenBRLProxy).initialize(
-                "Astonic BRL",
-            "aBRL",
-                initialBalanceAddresses,
-                initialBalanceValues
-            );
-            IStableTokenV2(stableTokenProxy).setBroker(brokerProxy);
-            IStableTokenV2(stableTokenEURProxy).setBroker(brokerProxy);
-            IStableTokenV2(stableTokenBRLProxy).setBroker(brokerProxy);
-
-            IReserve(reserveProxy).addExchangeSpender(brokerProxy);
-            IReserve(reserveProxy).addExchangeSpender(0x268C754bb4Ee50dCa0aF1E81e6B3eDA3c8Be93db);
-            IReserve(reserveProxy).addToken(stableTokenProxy);
-            IReserve(reserveProxy).addToken(stableTokenEURProxy);
-            IReserve(reserveProxy).addToken(stableTokenBRLProxy);
-            IReserve(reserveProxy).addCollateralAsset(0xecEEEfCEE421D8062EF8d6b4D814efe4dc898265);
-            IReserve(reserveProxy).addCollateralAsset(0x5EBCdf1De1781e8B5D41c016B0574aD53E2F6E1A);
 
             Config.Pool[] memory allPoolConfig = new Config.Pool[](6);
             allPoolConfig[0] = aUSDPlanq_PoolConfig();
@@ -154,6 +63,8 @@ contract AUST03_CreateContracts is Script {
 
             IPricingModule constantProduct = IPricingModule(cpPricingModule);
             IPricingModule constantSum = IPricingModule(csPricingModule);
+
+
             for (uint256 i = 0; i < allPoolConfig.length; i++) {
                 Config.Pool memory poolConfig = allPoolConfig[i];
 
@@ -175,8 +86,6 @@ contract AUST03_CreateContracts is Script {
                 IBiPoolManager(biPoolManagerProxy).createExchange(pool);
             }
 
-            IBreakerBox(breakerBox).addBreaker(address(medianDeltaBreaker), 1);
-            IBreakerBox(breakerBox).addBreaker(address(valueDeltaBreaker), 2);
 
             Config.RateFeed[] memory rateFeedConfig = new Config.RateFeed[](6);
             rateFeedConfig[0] = PLQUSD_RateFeedConfig();
@@ -276,23 +185,6 @@ contract AUST03_CreateContracts is Script {
         }
         vm.stopBroadcast();
 
-        console2.log("----------");
-        console2.log("BrokerProxy deployed at: ", brokerProxy);
-        console2.log("BiPoolManagerProxy deployed at: ", biPoolManagerProxy);
-        console2.log("ReserveProxy deployed at: ", reserveProxy);
-        console2.log("StableTokenProxy deployed at: ", stableTokenProxy);
-        console2.log("StableTokenEURProxy deployed at: ", stableTokenEURProxy);
-        console2.log("StableTokenBRLProxy deployed at: ", stableTokenBRLProxy);
-        console2.log("ConstantSumPricingModule deployed at: ", address(csPricingModule));
-        console2.log("ConstantProductPricingModule deployed at: ", address(cpPricingModule));
-        console2.log("MedianDeltaBreaker deployed at", address(medianDeltaBreaker));
-        console2.log("ValueDeltaBreaker deployed at", address(valueDeltaBreaker));
-        console2.log("BreakerBox deployed at: ", breakerBox);
-        console2.log("BiPoolManager deployed at: ", biPoolManager);
-        console2.log("Broker deployed at: ", broker);
-        console2.log("Reserve deployed at: ", reserve);
-        console2.log("StableTokenV2 deployed at: ", stableToken);
-        console2.log("----------");
     }
 
     /**
@@ -309,41 +201,6 @@ contract AUST03_CreateContracts is Script {
         );
     }
 
-    function reserveInitCalldata() internal view returns (bytes memory) {
-        Config.PartialReserve memory  partialReserve;
-
-        partialReserve.registryAddress = address(0x9DabFe01de024C681320eb80FBc64EccEaa58ca2);
-        partialReserve.tobinTaxStalenessThreshold = 3153600000;
-        partialReserve.assetAllocationSymbols = Arrays.bytes32s(
-        bytes32("PLQ")
-        );
-        partialReserve.assetAllocationWeights = Arrays.uints(
-        uint256(1 * 10 ** 24)
-        );
-        partialReserve.tobinTax = FixidityLib.newFixed(0).unwrap();
-        partialReserve.tobinTaxReserveRatio = FixidityLib.newFixed(0).unwrap();
-        partialReserve.frozenPlanq = 0;
-        partialReserve.frozenDays = 0;
-        partialReserve.spendingRatioForPlanq = FixidityLib.fixed1().unwrap();
-
-        partialReserve.collateralAssets = Arrays.addresses(registry.getAddressForString("BridgedUSDC"), registry.getAddressForString("PlanqToken"));
-        partialReserve.collateralAssetDailySpendingRatios = Arrays.uints(FixidityLib.fixed1().unwrap(), FixidityLib.fixed1().unwrap());
-
-        return abi.encodeWithSelector(
-            IReserve(0x36D70b7e17e415F854E453E66383944710Ce04cc).initialize.selector,
-            partialReserve.registryAddress,
-            partialReserve.tobinTaxStalenessThreshold,
-            partialReserve.spendingRatioForPlanq,
-            partialReserve.frozenPlanq,
-            partialReserve.frozenDays,
-            partialReserve.assetAllocationSymbols,
-            partialReserve.assetAllocationWeights,
-            partialReserve.tobinTax,
-            partialReserve.tobinTaxReserveRatio,
-            partialReserve.collateralAssets,
-            partialReserve.collateralAssetDailySpendingRatios
-        );
-    }
 
     function aUSDPlanq_PoolConfig() internal view returns (Config.Pool memory config) {
         config = Config.Pool({
@@ -456,7 +313,7 @@ contract AUST03_CreateContracts is Script {
     function aUSDUSDC_PoolConfig() internal returns (Config.Pool memory config) {
         config = Config.Pool({
             asset0: registry.getAddressForString("StableToken"),
-            asset1: contracts.dependency("BridgedUSDC"),
+            asset1: registry.getAddressForString("BridgedUSDC"),
             isConstantSum: true,
             spread: FixidityLib.newFixedFraction(2, 10000), // 0.0002
             minimumReports: 2,
@@ -489,8 +346,8 @@ contract AUST03_CreateContracts is Script {
 
     function aEURUSDC_PoolConfig() internal returns (Config.Pool memory config) {
         config = Config.Pool({
-            asset0: contracts.planqRegistry("StableTokenEUR"),
-            asset1: contracts.dependency("BridgedUSDC"),
+            asset0: registry.getAddressForString("StableTokenEUR"),
+            asset1: registry.getAddressForString("BridgedUSDC"),
             isConstantSum: true,
             spread: FixidityLib.newFixedFraction(25, 10000), // 0.0025
             minimumReports: 2,
@@ -524,8 +381,8 @@ contract AUST03_CreateContracts is Script {
 
     function aBRLUSDC_PoolConfig() internal returns (Config.Pool memory config) {
         config = Config.Pool({
-            asset0: contracts.planqRegistry("StableTokenBRL"),
-            asset1: contracts.dependency("BridgedUSDC"),
+            asset0: registry.getAddressForString("StableTokenBRL"),
+            asset1: registry.getAddressForString("BridgedUSDC"),
             isConstantSum: true,
             spread: FixidityLib.newFixedFraction(25, 10000), // 0.0025
             minimumReports: 2,

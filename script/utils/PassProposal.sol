@@ -3,14 +3,14 @@ pragma solidity ^0.8;
 
 import { Script } from "./Script.sol";
 
-import { IGovernanceFactory } from "../../interfaces/IGovernanceFactory.sol";
-import { IGovernor } from "../../interfaces/IGovernor.sol";
+import { IGovernanceFactory } from "../interfaces/IGovernanceFactory.sol";
+import { IGovernor } from "../interfaces/IGovernor.sol";
 import { console2 } from "forge-std/Script.sol";
-import { Chain } from "./Chain.sol";
+import { PlanqChain } from "./Chain.sol";
 
 contract PassProposal is Script {
     function run(uint256 proposalId) public {
-        IGovernor governance = IGovernor(IGovernanceFactory(Chain.governanceFactory()).astonicGovernor());
+        IGovernor governance = IGovernor(IGovernanceFactory(PlanqChain.governanceFactory()).astonicGovernor());
 
         if (governance.state(proposalId) != 1) {
             revert(unicode"❌ Proposal is not active");
