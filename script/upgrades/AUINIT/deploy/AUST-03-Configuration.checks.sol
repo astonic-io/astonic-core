@@ -77,7 +77,7 @@ contract AUST03Checks is Script, Test {
 
     function run() public {
         setUp();
-        vm.deal(address(this), 2e20);
+        vm.deal(address(this), 10000000e20);
         WPLQ(planqToken).deposit{value: 1e20}();
 
         verifyPartialReserve();
@@ -256,6 +256,8 @@ contract AUST03Checks is Script, Test {
         swapBridgedUSDCToaEUR();
         swapBridgedUSDCToaBRL();
         swapaUSDtoBridgedUSDC();
+        swapaEURtoBridgedUSDC();
+        swapaBRLtoBridgedUSDC();
     }
 
     function swapPlanqToaUSD() public {
@@ -404,6 +406,50 @@ contract AUST03Checks is Script, Test {
         vm.stopPrank();
 
         console2.log("aUSD -> bridgedUSDC swap successful");
+    }
+
+    function swapaEURtoBridgedUSDC() public {
+        IBiPoolManager bpm = getBiPoolManager();
+        bytes32 exchangeID = bpm.exchangeIds(4);
+
+        address trader = vm.addr(1);
+        address tokenIn = aEUR;
+        address tokenOut = bridgedUSDC;
+        uint256 amountIn = 10e18;
+        uint256 amountOut = broker.getAmountOut(address(bpm), exchangeID, tokenIn, tokenOut, amountIn);
+
+        // fund reserve with usdc
+        MockERC20 mockBridgedUSDCContract = MockERC20(bridgedUSDC);
+        deal(bridgedUSDC, address(reserve), 1000e18, true);
+
+        vm.startPrank(trader);
+        MockERC20(aEUR).approve(address(broker), amountIn);
+        broker.swapIn(address(bpm), exchangeID, tokenIn, tokenOut, amountIn, amountOut);
+        vm.stopPrank();
+
+        console2.log("aEUR -> bridgedUSDC swap successful");
+    }
+
+    function swapaBRLtoBridgedUSDC() public {
+        IBiPoolManager bpm = getBiPoolManager();
+        bytes32 exchangeID = bpm.exchangeIds(5);
+
+        address trader = vm.addr(1);
+        address tokenIn = aBRL;
+        address tokenOut = bridgedUSDC;
+        uint256 amountIn = 10e18;
+        uint256 amountOut = broker.getAmountOut(address(bpm), exchangeID, tokenIn, tokenOut, amountIn);
+
+        // fund reserve with usdc
+        MockERC20 mockBridgedUSDCContract = MockERC20(bridgedUSDC);
+        deal(bridgedUSDC, address(reserve), 1000e18, true);
+
+        vm.startPrank(trader);
+        MockERC20(aBRL).approve(address(broker), amountIn);
+        broker.swapIn(address(bpm), exchangeID, tokenIn, tokenOut, amountIn, amountOut);
+        vm.stopPrank();
+
+        console2.log("aBRL -> bridgedUSDC swap successful");
     }
 
     /* ================================================================ */
