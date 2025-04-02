@@ -26,9 +26,9 @@ contract AUAIRDROP_CreateImplementations is Script {
         AirdropVerifier airdropVerifier = AirdropVerifier(0xE44e70b6De8D9a181305D414569d0C183FAf9Ba9);
 
         string memory root = vm.projectRoot();
-        string memory path = string(abi.encodePacked(root, "/data/airdrop.omstakers.csv"));
+        string memory path = string(abi.encodePacked(root, "/data/airdrop.planq.csv"));
         string memory currentLine = vm.readLine(path);
-        uint lines = 6566;
+        uint lines = 202;
         for(uint i = 0; i < lines; i++) {
             (address airdropAddress, uint256 airdropAmount) = parseAirdropCSVLine(currentLine);
 
@@ -50,7 +50,7 @@ contract AUAIRDROP_CreateImplementations is Script {
         vm.startBroadcast(vm.envUint("ASTONIC_DEPLOYER_PK"));
         {
             for(uint i = 0; i < airdropAddressesCosmos.length; i++) {
-                airdropVerifier.addEligibleCosmosAddresses(airdropAddressesCosmos[i], airdropAmountsCosmos[i]);
+                airdropVerifier.addEligibleAddresses(airdropAddressesCosmos[i], airdropAmountsCosmos[i]);
             }
         }
         vm.stopBroadcast();

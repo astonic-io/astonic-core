@@ -102,14 +102,19 @@ contract AUST03_CreateContracts is Script {
                 rateFeedConfig[1].rateFeedID,
                 rateFeedConfig[2].rateFeedID
                 ),
-                rateFeedConfig[0].medianDeltaBreaker0.cooldown
+            Arrays.uints(
+                rateFeedConfig[0].medianDeltaBreaker0.cooldown,
+                rateFeedConfig[1].medianDeltaBreaker0.cooldown,
+                rateFeedConfig[2].medianDeltaBreaker0.cooldown
+            )
             );
 
             IMedianDeltaBreaker(medianDeltaBreaker).setCooldownTime(
             Arrays.addresses(
                 rateFeedConfig[3].rateFeedID
                 ),
-                rateFeedConfig[3].valueDeltaBreaker0.cooldown
+            Arrays.uints(
+                rateFeedConfig[3].valueDeltaBreaker0.cooldown)
             );
 
             IMedianDeltaBreaker(medianDeltaBreaker).setCooldownTime(
@@ -117,7 +122,10 @@ contract AUST03_CreateContracts is Script {
                 rateFeedConfig[4].rateFeedID,
                 rateFeedConfig[5].rateFeedID
                 ),
-                rateFeedConfig[4].medianDeltaBreaker0.cooldown
+            Arrays.uints(
+                rateFeedConfig[4].medianDeltaBreaker0.cooldown,
+                rateFeedConfig[5].medianDeltaBreaker0.cooldown
+                )
             );
 
             IMedianDeltaBreaker(medianDeltaBreaker).setRateChangeThresholds(
